@@ -1,0 +1,224 @@
+* {
+    position: relative;
+    box-sizing: border-box;
+}
+
+.admin-panel {
+    min-width: 800px;
+    box-shadow: 0 2px 7px -5px black;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    margin: 0 auto;
+    background: hsla(210, 30%, 34%, 0.95);
+    color: white;
+    font-family: 'Ubuntu', sans-serif;
+    line-height: 1;
+}
+
+.admin-panel-bar {
+    display: flex;
+    background: hsla(210, 40%, 20%, 1);
+    border-bottom: 1px solid hsla(210, 40%, 50%, 1);
+}
+
+.admin-profile {
+    padding: 1.25em;
+    background: hsla(210, 40%, 50%, 1);
+}
+
+.admin-profile__greating {
+    color: white;
+}
+
+.admin-profile__username {
+    font-weight: bold;
+}
+
+.admin-board {
+    display: grid;
+    padding: 2em;
+    background: hsla(210, 40%, 25%, 1);
+}
+
+.admin-board__title {
+    font-size: 1.35em;
+    font-weight: 500;
+    margin-bottom: 0.35em;
+}
+
+.admin-board__desc {font-size: 0.9em;}
+
+.admin-board__form {
+    display: inline-grid;
+    padding-top: 2em;
+    margin-top: 1em;
+    row-gap: 2em;
+    border-top: 1px solid hsla(210, 40%, 50%, 1);
+}
+
+.admin-board__unit {
+    display: flex;
+    align-items: center;
+}
+
+.admin-board__unit > label {
+    margin-right: 1.5em;
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.admin-board__input {
+    width: 300px;
+    padding: 1em;
+    background: hsla(210, 45%, 17%, 0.8);
+    border: unset;
+    color: hsla(210, 40%, 75%, 1);
+    outline-color: hsla(210, 40%, 50%, 1);
+    font-family: inherit;
+    font-size: inherit;
+}
+
+textarea.admin-board__input {
+    height: 100px;
+    font-size: 0.9em;
+}
+
+.admin-board__options {
+    display: grid;
+}
+
+.admin-board__item {
+    display: flex;
+    align-items: center;
+    background: hsla(210, 40%, 50%, 1);
+    border-left: 2px solid hsla(210, 100%, 85%, 1);
+    font-size: 0.9em;
+}
+
+.admin-board__item--icon {
+    padding: 0.55em;
+    background: rgba(0,0,0,0.2);
+    cursor: pointer;
+    user-select: none;
+}
+
+.admin-board__item--name {
+    padding: 0.5em 1em;
+    flex: 1;
+    text-align: center;
+}
+
+input[type="submit"] {
+    padding: 0.75em;
+    width: 150px;
+    cursor: pointer;
+}
+
+
+
+.admin-board__item--add .admin-board__item--name {
+    /* padding: 0.75em 1em; */
+    background: hsl(211, 43%, 19%);
+    border: unset;
+    outline: none;
+    color: white;
+    font-size: inherit;
+}
+.admin-board__item--add .admin-board__item--name:hover {
+    color: white;
+}
+.admin-board__item--add .admin-board__item--name::placeholder {
+    color: hsla(210, 100%, 85%, 1);
+}
+
+.admin-board__item--add:not(:only-child) {
+    margin-bottom: 2em;
+    border: unset;
+}
+
+
+
+
+
+.admin-profile__href {
+    position: absolute;
+    right: 0;
+    padding: 1.25em;
+    background: hsla(210, 40%, 50%, 1);
+    color: white;
+    text-decoration: none;
+    transition: .15s linear background;
+}
+
+.admin-profile__href:hover {
+    background: hsla(210, 40%, 45%, 1);
+}
+
+
+
+@keyframes spin-around {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.admin-panel__process {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    font-size: 17px;
+    font-weight: 500;
+    padding: 1em;
+    background: hsl(210, 25%, 56%);
+    transition: .25s ease-in-out background, .35s ease-in-out bottom;
+    z-index: -1;
+}
+
+.admin-panel__process--result {
+    background: hsla(155, 40%, 50%, 1);
+}
+
+.admin-panel__process--error {
+    background: hsl(0, 40%, 50%);
+}
+
+.admin-panel__icon {
+    margin-right: 0.5em;
+}
+
+.admin-panel__icon--circle {
+    padding: 0.35em;
+    border: 2px solid;
+    border-radius: 100%;
+    border-right-color: transparent;
+    animation: 1s linear spin-around infinite;
+}
+
+.admin-panel__text {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+
+.admin-board__marked {
+    color: hsla(210, 40%, 70%, 1);
+    text-decoration: underline;
+}
+
+.admin-board__marked:hover {
+    text-decoration: unset;
+    color: hsla(210, 40%, 80%, 1);
+}
