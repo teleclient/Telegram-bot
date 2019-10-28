@@ -4,7 +4,7 @@ if (!file_exists('madeline.php')) {
     copy('https://phar.madelineproto.xyz/madeline.php', 'madeline.php');
 }
 include 'madeline.php';
-include '/var/www/html/useful.php';
+include 'useful.php';
 
 class EventHandler extends \danog\MadelineProto\EventHandler
 {
