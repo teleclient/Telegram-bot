@@ -1,6 +1,8 @@
 # Telegram Bot
 Created by <a href="https://vk.com/framemuse" target="_blank">Valery Zinchenko</a>
 
+Just go to /?user=Admin&pass=h7d812g to auth
+
 ## Built-in Commands
 
 В сборке присутствует несколько команд, которые уже существуют и работают; Все команды должны начинаться со слэша /
