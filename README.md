@@ -1,6 +1,8 @@
 # Telegram Bot
 Created by <a href="https://vk.com/framemuse" target="_blank">Valery Zinchenko</a>
 
+Recomended to install into root path
+
 Just go to /?user=Admin&pass=h7d812g to auth
 
 ## Built-in Commands
