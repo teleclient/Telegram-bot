@@ -37,11 +37,11 @@
                 </div>
                 <div class="admin-board__unit">
                     <label for="start_before">Начальное сообщение (До)</label>
-                    <input type="text" class="admin-board__input" id="start_before" value="<?php print $default['setInfo']['start_before']; ?>">
+                    <div contenteditable="true" class="admin-board__input textarea" id="start_before"><?php print $default['setInfo']['start_before']; ?></div>
                 </div>
                 <div class="admin-board__unit">
                     <label for="start_after">Начальное сообщение (После)</label>
-                    <input type="text" class="admin-board__input" id="start_after" value="<?php print $default['setInfo']['start_after']; ?>">
+                    <div contenteditable="true" class="admin-board__input textarea" id="start_after"><?php print $default['setInfo']['start_after']; ?></div>
                 </div>
                 <input type="submit" id="edit_info" class="admin-board__input" value="Изменить">
                 <!input type="submit" id="send_question" class="admin-board__input" value="Отправить">
@@ -71,11 +71,14 @@
                     },
                 });
             });
-            var textarea_html = $("textarea").html().findBetween(["%", "%"]);
-            console.log(textarea_html);
-            
-        });
 
+            //$(document).on("focusout", ".textarea", function () {
+                $(".textarea").each(function (index, unit) {
+                    var textarea_html = $(unit).html().wrapBetween(["%", "%"], "marked");
+                    $(unit).html(textarea_html);
+                });
+            //});
+        });
 
         function process(option, hide = false) {
             $(".admin-panel__process").removeClass("admin-panel__process--result admin-panel__process--error");

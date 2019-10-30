@@ -255,3 +255,11 @@ input[type="submit"] {
 input[type="submit"]:hover {
     background: hsla(216, 15%, 58%, 1);
 }
+
+.marked {
+    color: #7db0ff;
+}
+
+.marked:after, .marked:before {
+    content: '%';
+}
