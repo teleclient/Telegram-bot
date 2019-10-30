@@ -97,13 +97,13 @@ body {
     font-family: inherit;
     font-size: 1.1em;
     font-weight: 500;
-    color: #93919a;
+    color: #676c7b;
 }
 
 textarea.admin-board__input {
     min-height: 100px;
-    width: 415px !important;
-    font-size: 1.025em;
+    width: 450px !important;
+    font-size: 1.05em;
 }
 
 .admin-board__options {
