@@ -228,7 +228,7 @@ class DataBase
     
     public function ping(int $loops = 1000)
     {
-        if ($this->DataBase && $this->DataBase->ping()) {
+        if ($this->DataBase && @$this->DataBase->ping()) {
             if ($this->ping_loops % 5 == 0) console("Connection pinged - OK")->paint("WHITE", "CYAN");
             if ($this->ping_loops > $loops) {
                 $this->reconnect();
