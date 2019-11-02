@@ -61,18 +61,21 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     public function message(array $options)
     {
         try {
-            if (isset($options['media'])) {
-                yield $this->messages->sendMedia($options);
-                return;
-            }
-            if (isset($options['method']) && $options['method'] == "edit" || (isset($options['peer']['_']) && $options['peer']['_'] == "updateEditMessage")) {
-                $options['id'] = $options['peer']['message']['id']+1;
-                yield $this->messages->editMessage($options);
-                return;
-            }
-            if (!isset($options['method']) || $options['method'] == "send") {
-                yield $this->messages->sendMessage($options);
-                return;
+            switch ($options['method']) {
+                case "edit":
+                    if (!isset($options['id'])) {
+                        $options['id'] = $options['peer']['message']['id']+1;
+                    }
+                    yield $this->messages->editMessage($options);
+                    break;
+
+                case "media":
+                    yield $this->messages->sendMedia($options);
+                    break;
+                
+                default:
+                    yield $this->messages->sendMessage($options);
+                    break;
             }
         } catch (\danog\MadelineProto\RPCErrorException $e) {
             yield $this->messages->sendMessage(['peer' => 565324826, 'message' => $e]);
@@ -188,7 +191,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             $res = var_export($update, true);
         }
 
-        yield $sendMessage = function ($if, object $closure) use (&$update) {
+        yield $Message = function ($if, object $closure) use (&$update) {
             $peer = $update['message']['from_id'];
             $message = $update['message']['message'];
 
@@ -207,12 +210,12 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             if ($getif) {
                 $options = [ // Default options
                     "peer" => &$update,
-                    "message" => "test message",
+                    "message" => "Default message",
                     'parse_mode' => 'HTML',
-                ]; 
-                foreach (yield $closure->__invoke() as $key => $value) {
-                    $options[$key] = $value;
-                }
+                ];
+                unset($options['_']);
+                foreach (yield $closure->__invoke() as $key => $value) yield $options[$key] = &$value;
+
                 yield $this->message($options);
                 throw new Exception("OK");
             }
@@ -228,8 +231,16 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
         try {
 
-            yield $sendMessage("/start", function () use (&$update) {
+            yield $Message("/start", function () use (&$update) {
                 $options = [
+                    '_' => [
+                        'rights' => [
+                            [
+                                '_' => 'UsersCanSee',
+                                'right' => 'yes',
+                            ],
+                        ],
+                    ],
                     'message' => $this->info['start_before'],
                     'parse_mode' => 'HTML',
                 ];
