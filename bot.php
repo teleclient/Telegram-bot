@@ -191,18 +191,18 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             $res = var_export($update, true);
         }
 
-        yield $Message = function ($if, object $closure) use (&$update) {
+        yield $Message = function ($if, $closure) use (&$update) {
             $peer = $update['message']['from_id'];
             $message = $update['message']['message'];
 
             switch (gettype($if)) {
-                case "string":
+                case string:
                     #$getif = $if == $message;
                     $getif = similar_text($if, $message, $percent) > 0 && $percent > 83;
                     print $percent;
                     break;
                 
-                case "array":
+                case array:
                     $getif = in_array($message, $if);
                     break;
             }
@@ -214,7 +214,10 @@ class EventHandler extends \danog\MadelineProto\EventHandler
                     'parse_mode' => 'HTML',
                 ];
                 unset($options['_']);
-                foreach (yield $closure->__invoke() as $key => $value) yield $options[$key] = &$value;
+                
+                if (gettype($closure) == object)
+                    foreach (yield $closure->__invoke() as $key => $value)
+                        yield $options[$key] = &$value;
 
                 yield $this->message($options);
                 throw new Exception("OK");
@@ -233,14 +236,6 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
             yield $Message("/start", function () use (&$update) {
                 $options = [
-                    '_' => [
-                        'rights' => [
-                            [
-                                '_' => 'UsersCanSee',
-                                'right' => 'yes',
-                            ],
-                        ],
-                    ],
                     'message' => $this->info['start_before'],
                     'parse_mode' => 'HTML',
                 ];
@@ -255,6 +250,18 @@ class EventHandler extends \danog\MadelineProto\EventHandler
                 return $options;
             });
 
+            yield $Message("/start", [
+                '_' => [
+                    'rights' => [
+                        [
+                            '_' => 'UsersCanSee',
+                            'right' => 'yes',
+                        ],
+                    ],
+                ],
+                'message' => $this->info['start_before'],
+                'parse_mode' => 'HTML',
+            ]);
 
         } catch (Exception $e) {
             yield print $e->getMessage()."\r\nThe exception was created on line: " . $e->getLine();
