@@ -214,7 +214,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
                     'parse_mode' => 'HTML',
                 ];
                 unset($options['_']);
-                
+
                 if (gettype($closure) == object)
                     foreach (yield $closure->__invoke() as $key => $value)
                         yield $options[$key] = &$value;
@@ -262,6 +262,21 @@ class EventHandler extends \danog\MadelineProto\EventHandler
                 'message' => $this->info['start_before'],
                 'parse_mode' => 'HTML',
             ]);
+
+            yield $Message("/start", function () {
+                return [
+                    '_' => [
+                        'rights' => [
+                            [
+                                '_' => 'UsersCanSee',
+                                'right' => 'yes',
+                            ],
+                        ],
+                    ],
+                    'message' => $this->info['start_before'],
+                    'parse_mode' => 'HTML',
+                ];
+            });
 
         } catch (Exception $e) {
             yield print $e->getMessage()."\r\nThe exception was created on line: " . $e->getLine();
