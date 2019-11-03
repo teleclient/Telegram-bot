@@ -363,12 +363,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     }
 }
 
-$settings = [
-    'app_info' => [
-        'api_id' => 968537,
-        'api_hash' => '6bff4f6700482c3940fb1ca987857e01',
-    ],
-];
+
 
 use danog\MadelineProto\MyTelegramOrgWrapper;
 
@@ -388,7 +383,6 @@ $wrapper->loop(function () use ($wrapper) {
         }
         
         \danog\MadelineProto\Logger::log($app);
-
     }
 });
 
