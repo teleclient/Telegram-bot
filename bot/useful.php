@@ -1,6 +1,9 @@
 <?php
 
-error_reporting(E_ERROR | E_PARSE);
+ini_set('error_display', 1);
+error_reporting(E_ALL);
+
+difine("APPNAME_BOT_DIR", "/home/koto/Telegram/bot/");
 
 /**
      * Pretty colourful version of print, prints text into console
@@ -149,7 +152,7 @@ class DataBase
     public $useful;
     public $config;
     private $DataBase;
-    private $config_file = "DataBase.json"; // It's niether a straight path to file or just a file
+    private $config_file = "database.json"; // It's niether a straight path to file or just a file
     private $ping_loops = 0;
     
     /**
