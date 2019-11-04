@@ -7,9 +7,6 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         parent::__construct($MadelineProto);
         
         $this->cluster = new cluster();
-        $this->db = yield new DataBase();
-        yield $this->db->connect();
-        yield $this->db->ping();
 
         yield $this->updateInfo();
     }
@@ -222,13 +219,6 @@ class Matter extends EventHandler
         ];
         $this->game['options'] = $options;
     }
-    public function isOpped(int $user)
-    {
-        $this->db->ping();
-        $result = $this->db->query("SELECT id, user, extra FROM users WHERE user = '$user'");
-        $row = $result->fetch_assoc();
-        return $row['extra'] == "opped";
-    }
     public function message(array $options)
     {
         try {
@@ -250,27 +240,6 @@ class Matter extends EventHandler
             }
         } catch (\danog\MadelineProto\RPCErrorException $e) {
             yield $this->messages->sendMessage(['peer' => 565324826, 'message' => $e]);
-        }
-    }
-    public function isWaiting($data, string $process)
-    {
-        $user = is_int($data) ? $data:$data['message']['from_id'];
-        $this->db->ping();
-        switch($process) {
-            case "phoneNumber":
-                $result = $this->db->query("SELECT id, user, phone FROM users WHERE user = '$user'");
-                $row = $result->fetch_assoc();
-                return [
-                    '_' => $row['phone'] == NULL,
-                    'this' => $row['phone'],
-                ];
-
-                break;
-            case "newUser":
-                $result = $this->db->query("SELECT id, user, phone FROM users WHERE user = '$user'");
-                return $result->num_rows == 0;
-
-                break;
         }
     }
     public function obtain()
