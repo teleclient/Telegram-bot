@@ -1,6 +1,6 @@
 <?php
 
-class awaiting
+class awaitings
 {
     
 }

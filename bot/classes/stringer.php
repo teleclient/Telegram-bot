@@ -1,4 +1,4 @@
-<?php namespace AppName\traits;
+<?php namespace AppName\abilities;
 
 /**
  * Stringer simplyfize data maintaining
@@ -9,52 +9,50 @@
  * 
  * Max. number of attachments is 2 
  */
-trait stringer
+class stringer
 {
-    static private $folder;
-    static private $files;
+    private $folder;
+    private $files;
     public function __construct(string $folder = "strings") {
-        self::$folder = $folder;
-        self::readDirectory($folder);
-
-        
+        $this->folder = $folder;
+        $this->readDirectory($folder);
     }
-    private static function readJSON(string $file_name, bool $isArray = false)
+    private function readJSON(string $file_name, bool $isArray = false)
     {
-        $file_path = self::$folder . "/" . $file_name . ".json";
+        $file_path = $this->folder . "/" . $file_name . ".json";
         $file_rough_data = file_get_contents($file_path);
         $file_data = json_decode($file_rough_data, $isArray);
-        if (!$isArray) self::$files[$file_name] = $file_data;
+        if (!$isArray) $this->files[$file_name] = $file_data;
         return $file_data;
     }
-    private static function readDirectory(string $folder)
+    private function readDirectory(string $folder)
     {
         $files_in_dir = scandir($folder);
         unset($files_in_dir[0], $files_in_dir[1]);
         foreach ($files_in_dir as $file_name) {
             $file = explode(".", $file_name);
             if ($file[1] == "json") {
-                self::readJSON($file[0]);
+                $this->readJSON($file[0]);
             }
         }
     }
-    static function cat(string $which) : object
+    public function cat(string $which) : object
     {
-        return self::$files[$which];
+        return $this->files[$which];
     }
-    static function alter(string $file, array $changes)
+    public function alter(string $file, array $changes)
     {
-        $reads = self::readJSON($file, true);
+        $reads = $this->readJSON($file, true);
         $changes = array_merge($reads, $changes);
 
-        $file_path = self::$folder . "/" . $file . ".json";
+        $file_path = $this->folder . "/" . $file . ".json";
         file_put_contents($file_path, json_encode($changes, JSON_PRETTY_PRINT));
 
         return $changes;
     }
-    static function code(string $file, array $variables)
+    public function code(string $file, array $variables)
     {
-        $changes = self::readJSON($file, true);
+        $changes = $this->readJSON($file, true);
         foreach ($variables as $var => $value) {
             foreach ($changes as $string => $data) {
                 if (gettype($data) == "array")
