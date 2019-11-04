@@ -2,12 +2,14 @@
 
 class EventHandler extends \danog\MadelineProto\EventHandler
 {
+    use AppName\abilities\cluster,
+        AppName\abilities\awaitings;
+
     public function __construct($MadelineProto)
     {
         parent::__construct($MadelineProto);
-        
         $this->cluster = new cluster();
-
+        $this->awaitings = new awaitings();
         yield $this->updateInfo();
     }
     public function onUpdateBotCallbackQuery($update)
@@ -65,7 +67,11 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             $res = var_export($update, true);
         }
 
-        if (yield $this->isWaiting($update, "newUser")) {
+        $awaitings = yield $this->awaitings->pullWith([
+            "user" => $res['message']['from_id']
+        ]);
+
+        if ($awaitings['user']['isNew']) {
             $Chat = yield $this->get_info($update);
             $user = $update['message']['from_id'];
             if (!isset($Chat['User']['first_name']) && empty($Chat['User']['first_name'])) $Chat['User']['first_name'] = null;
