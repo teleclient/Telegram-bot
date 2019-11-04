@@ -1,4 +1,4 @@
-<?php
+<?php namespace AppName\abilities;
 
 class cluster
 {
