@@ -3,7 +3,7 @@
 ini_set('error_display', 1);
 error_reporting(E_ALL);
 
-difine("APPNAME_BOT_DIR", "/home/koto/Telegram/bot/");
+difine("APPNAME_BOT_DIR", "/home/koto/Telegram/bot");
 
 /**
      * Pretty colourful version of print, prints text into console
