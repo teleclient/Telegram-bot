@@ -1,4 +1,4 @@
-<?php
+<?php namespace AppName\abilities;
 
 class awaitings
 {
@@ -23,7 +23,7 @@ class awaitings
     private function user(array $settings)
     {
         $user = $settings['user'];
-        
+
         $this->db->ping();
         $result = $this->db->query("SELECT * FROM users WHERE user = '$user'");
         @$row = $result->fetch_assoc();
