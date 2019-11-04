@@ -1,6 +1,6 @@
 <?php namespace AppName\abilities;
 
-class cluster
+class cluster extends Matter
 {
     use \AppName\abilities\stringer;
 
@@ -35,14 +35,14 @@ class cluster
         $this->start($update, $extra);
     }
 
-    function SendMessage()
+    function SendMessage($update, $extra)
     {
-        yield $this->updateInfo();
-        $options = $this->game['options'];
-        yield $this->forUsers(function ($peer) use ($options) {
+        yield parent::updateInfo();
+        $options = parent::$game['options'];
+        yield parent::forUsers(function ($peer) use ($options) {
             try {
                 $options['peer'] = $peer;
-                yield $this->messages->sendMedia($options);
+                yield parent::$messages->sendMedia($options);
             } catch (\Throwable $e) {
                 yield print $e->getMessage();
             }
