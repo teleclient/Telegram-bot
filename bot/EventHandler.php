@@ -7,7 +7,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         parent::__construct($MadelineProto);
         
         $this->cluster = new cluster();
-        $this->db = yield new DataBase("/var/www/html/database.json");
+        $this->db = yield new DataBase();
         yield $this->db->connect();
         yield $this->db->ping();
 
@@ -68,47 +68,6 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             $res = var_export($update, true);
         }
 
-        yield $Message = function ($if, $closure) use (&$update) {
-            $peer = $update['message']['from_id'];
-            $message = $update['message']['message'];
-
-            switch (gettype($if)) {
-                case string:
-                    #$getif = $if == $message;
-                    $getif = similar_text($if, $message, $percent) > 0 && $percent > 83;
-                    print $percent;
-                    break;
-                
-                case array:
-                    $getif = in_array($message, $if);
-                    break;
-            }
-
-            if ($getif) {
-                $options = [ // Default options
-                    "peer" => &$update,
-                    "message" => "Default message",
-                    'parse_mode' => 'HTML',
-                ];
-                unset($options['_']);
-
-                if (gettype($closure) == object)
-                    foreach (yield $closure->__invoke() as $key => $value)
-                        yield $options[$key] = &$value;
-
-                yield $this->message($options);
-                throw new Exception("OK");
-            }
-        };
-
-        function check() {
-            $message = $update['message']['message'];
-
-            if (in_array($message, $this->cluster->commands)) {
-                yield $this->cluster->$message();
-            }
-        }
-
         if (yield $this->isWaiting($update, "newUser")) {
             $Chat = yield $this->get_info($update);
             $user = $update['message']['from_id'];
@@ -119,49 +78,13 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
         try {
 
-            yield $Message("/start", function () use (&$update) {
-                $options = [
-                    'message' => $this->info['start_before'],
-                    'parse_mode' => 'HTML',
-                ];
-                
-                $Chat = yield $this->get_info($update);
-                $name = yield $this->isWaiting($update, "phoneNumber");
-                if (!$name['_']) {
-                    $start_after = str_replace('%name%', $name['this'], $this->info['start_after']);
-                    $options['message'] = $start_after;
-                }
+            $message = $res['message']['message'];
 
-                return $options;
-            });
-
-            yield $Message("/start", [
-                '_' => [
-                    'rights' => [
-                        [
-                            '_' => 'UsersCanSee',
-                            'right' => 'yes',
-                        ],
-                    ],
-                ],
-                'message' => $this->info['start_before'],
-                'parse_mode' => 'HTML',
-            ]);
-
-            yield $Message("/start", function () {
-                return [
-                    '_' => [
-                        'rights' => [
-                            [
-                                '_' => 'UsersCanSee',
-                                'right' => 'yes',
-                            ],
-                        ],
-                    ],
-                    'message' => $this->info['start_before'],
-                    'parse_mode' => 'HTML',
-                ];
-            });
+            // Check for entered commands
+            if (in_array($message, $this->cluster->commands)) {
+                $return = yield $this->cluster->$message();
+                          yield $this->handle($update, $return);
+            }
 
         } catch (Exception $e) {
             yield print $e->getMessage()."\r\nThe exception was created on line: " . $e->getLine();
@@ -250,6 +173,21 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
 class Matter extends EventHandler
 {
+    public function handle (array &$update, $closure) {
+        $options = [ // Default options
+            "peer" => &$update,
+            "message" => "Default message",
+            'parse_mode' => 'HTML',
+        ];
+        unset($options['_']);
+
+        if (gettype($closure) == object)
+            foreach (yield $closure->__invoke() as $key => $value)
+                yield $options[$key] = &$value;
+
+        yield $this->message($options);
+        throw new Exception("OK");
+    }
     public function eachUser(object $closure, $random = false)
     {
         $me = yield $this->get_self();
