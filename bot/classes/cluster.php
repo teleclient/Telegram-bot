@@ -34,4 +34,20 @@ class cluster
     {
         $this->start($update, $extra);
     }
+
+    function SendMessage()
+    {
+        yield $this->updateInfo();
+        $options = $this->game['options'];
+        yield $this->forUsers(function ($peer) use ($options) {
+            try {
+                $options['peer'] = $peer;
+                yield $this->messages->sendMedia($options);
+            } catch (\Throwable $e) {
+                yield print $e->getMessage();
+            }
+        });
+
+        return;
+    }
 }
