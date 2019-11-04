@@ -10,29 +10,31 @@
 trait stringer
 {
     private $folder;
-    protected $files;
+    private $files;
     public function __construct(string $folder = "strings") {
         self::folder = $folder;
         self::readDirectory($folder);
     }
-    private static function readJSON($file): object
+    private static function readJSON($file_name): object
     {
-        $data = json_decode($file);
-        self::files[] = $data;
-        return $data;
+        $file_path = self::folder . "/" . $file_name;
+        $file_data = json_decode($file_path.".json");
+        self::files[$file_name] = $file_data;
+        return $file_data;
     }
     private static function readDirectory($folder)
     {
         $files_in_dir = scandir($folder);
-        foreach ($files_in_dir as $file) {
-            if ($file == explode(".", $file)[1]) {
-                self::readJSON(self::folder."/".$file);
+        foreach ($files_in_dir as $file_name) {
+            $file = explode(".", $file_name);
+            if ($file[1] == "json") {
+                self::readJSON($file_name);
             }
         }
     }
-    static function cat() : object
+    static function cat($which) : object
     {
-        # code...
+        return self::files[$which];
     }
 }
 
