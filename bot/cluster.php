@@ -9,6 +9,11 @@ class cluster
         $commands = get_class_methods($this);
         unset($commands[0]);
         $this->commands = $commands;
+        $this->stringer = new stringer(APPNAME_BOT_DIR."/strings");
+    }
+
+    private function info($which) {
+        return $this->stringer->cat[$which];
     }
 
     function start($update, $extra)
@@ -20,7 +25,7 @@ class cluster
         
         $name = yield $this->isWaiting($update, "phoneNumber");
         if (!$name['_']) {
-            $start_after = str_replace('%name%', $name['this'], $this->info['start_after']);
+        $start_after = str_replace('%name%', $name['this'], $this->info('bot')->start_after);
             $options['message'] = $start_after;
         }
 
