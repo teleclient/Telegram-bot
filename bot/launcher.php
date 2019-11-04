@@ -4,12 +4,8 @@ if (!file_exists('madeline.php')) {
     copy('https://phar.madelineproto.xyz/madeline.php', 'madeline.php');
 }
 include 'madeline.php';
-include 'useful.php'; // Useful classes and functions
-include 'traits/load.php';
-    \AppName\traits\load();
-
-include 'cluster.php'; // Commands cluster
-include 'EventHandler.php'; // Main event handler
+include 'classes/load.php';
+    \AppName\abilities\load();
 
 use danog\MadelineProto\Stream\MTProtoTransport\ObfuscatedStream;
 use danog\MadelineProto\Stream\Proxy\HttpProxy;

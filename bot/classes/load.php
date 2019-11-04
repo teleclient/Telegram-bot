@@ -1,4 +1,4 @@
-<?php namespace AppName\traits;
+<?php namespace AppName\abilities;
 
 function load()
 {
