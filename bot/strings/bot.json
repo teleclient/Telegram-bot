@@ -1,4 +1,6 @@
 {
-    "start_after": "start_after",
-    "start_before": "start_before"
+    "message": {
+        "after": "start_after",
+        "before": "start_before"
+    }
 }
