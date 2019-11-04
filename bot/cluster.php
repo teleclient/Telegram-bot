@@ -9,11 +9,11 @@ class cluster
         $commands = get_class_methods($this);
         unset($commands[0]);
         $this->commands = $commands;
-        $this->stringer = new stringer(APPNAME_BOT_DIR."/strings");
+        #$this->stringer = new stringer(APPNAME_BOT_DIR."/strings");
     }
 
     private function info() {
-        return $this->stringer->cat["bot"];
+        return self::cat("bot");
     }
 
     function start($update, $extra)
@@ -35,5 +35,3 @@ class cluster
         $this->start($update, $extra);
     }
 }
-
-?>
