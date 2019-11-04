@@ -12,16 +12,18 @@ class awaitings
         $this->db->connect();
         $this->db->ping();
     }
-    public function pull(): array
+    public function pullWith(array &$settings): array
     {
         $options = [];
         foreach ($this->functions as $function) {
-            $options[$function] = call_user_func($function);
+            $options[$function] = call_user_func($function, $settings);
         }
         return $options;
     }
-    private function user(int $user)
+    private function user(array $settings)
     {
+        $user = $settings['user'];
+        
         $this->db->ping();
         $result = $this->db->query("SELECT * FROM users WHERE user = '$user'");
         @$row = $result->fetch_assoc();
