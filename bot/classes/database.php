@@ -2,26 +2,29 @@
 
 class DataBase
 {
-    public $useful;
     public $config;
     private $DataBase;
-    private $config_file = "database.json"; // It's niether a straight path to file or just a file
+    private $config_file = (__DIR__)."/database.json"; // It's niether a straight path to file or just a file
     private $ping_loops = 0;
     
     /**
-     * @param object|array|null $mysqli 
+     * @param object|array|null $option 
      */
-    public function __construct($mysqli = null)
+    public function __construct($option = null)
     {
-        switch (gettype($mysqli)) {
+        switch (gettype($option)) {
             case "object":
-                $this->DataBase = &$mysqli;
+                $this->DataBase = &$option;
                 break;
             case "array":
-                $this->setSettings($mysqli);
+                $this->setSettings($option);
+                break;
+            case "string":
+                $this->config_file = &$option;
+                $this->getSettings();
                 break;
             default:
-                print_r($this->getSettings());
+                $this->getSettings();
                 break;
         }
     }
@@ -31,22 +34,22 @@ class DataBase
         if (file_exists($this->config_file)) {
             $file = file_get_contents($this->config_file);
             $config = json_decode($file, true);
-        } else throw new Exception("Error: config file doesn't exist in '{$this->config_file}'");
-        console("DataBase settings were successfully recieved")->paint("WHITE", "GREEN");
+        } else throw new \Exception("Error: config file doesn't exist in '{$this->config_file}'");
+        if (\useful::$settings['notice']) console("DataBase settings were successfully recieved")->paint("WHITE", "GREEN");
         return $this->config = $config;
     }
 
-    public function setSettings(array $settings) : void
+    public function setSettings(array $settings)
     {
         $this->config = $settings;
         $data = json_encode($settings, JSON_PRETTY_PRINT);
-        if (file_put_contents($this->config_file, $data)) console("DataBase settings were successfully set up")->paint("WHITE", "GREEN");
+        if (file_put_contents($this->config_file, $data)) if (\useful::$settings['notice']) console("DataBase settings were successfully set up")->paint("WHITE", "GREEN");
     }
 
     public function connect()
     {
         try {
-            $this->DataBase = new \mysqli($this->config['hostname'], $this->config['username'], $this->config['password'], $this->config['database']);
+            $this->DataBase = new \mysqli($this->config['hostname'], $this->config['username'], $this->config['password'], $this->config['basename']);
             if ($this->DataBase->connect_errno) {
                 $error = "Failed to connect to MySQL: (" . $this->DataBase->connect_errno . ") " . $this->DataBase->connect_error;
                 console($error)->paint("WHITE", "RED");
@@ -59,10 +62,10 @@ class DataBase
     public function reconnect()
     {
         if (!$this->DataBase || $this->DataBase->close()) {
-            console("Reconnection...")->paint("BLACK", "LIGHTGRAY", true);
+            if (\useful::$settings['notice']) console("Reconnection...")->paint("BLACK", "LIGHTGRAY", true);
             $this->connect();
             print "     ";
-            if (!$this->DataBase->connect_errno) console("OK")->paint("BLACK", "LIGHTGRAY");
+            if (!$this->DataBase->connect_errno) if (\useful::$settings['notice']) console("OK")->paint("BLACK", "LIGHTGRAY");
         }
         else return false;
     }
@@ -73,7 +76,7 @@ class DataBase
             if (!$this->DataBase) $this->ping();
             if ($query != false) $result = $this->DataBase->query($query);
             if (isset($this->DataBase->errno) && $this->DataBase->errno) {
-                throw new Exception("Failed to send a query to MySQL: (" . $this->DataBase->errno . ") " . $this->DataBase->error);
+                throw new \Exception("Failed to send a query to MySQL: (" . $this->DataBase->errno . ") " . $this->DataBase->error);
             }
             if ($close) $this->DataBase->close(); else $this->ping();
             if (isset($result)) return $result; else return false;
@@ -85,7 +88,7 @@ class DataBase
     public function ping(int $loops = 1000)
     {
         if ($this->DataBase && @$this->DataBase->ping()) {
-            if ($this->ping_loops % 5 == 0) console("Connection pinged - OK")->paint("WHITE", "CYAN");
+            if ($this->ping_loops % 5 == 0) if (\useful::$settings['notice']) console("Connection pinged - OK")->paint("WHITE", "CYAN");
             if ($this->ping_loops > $loops) {
                 $this->reconnect();
                 $this->ping_loops = 0;
@@ -93,11 +96,9 @@ class DataBase
             $this->ping_loops++;
             return true;
         } else {
-            console("Connection pinged - ERROR: ".@$this->DataBase->error)->paint("WHITE", "RED");
+            if (\useful::$settings['notice']) console("Connection pinged - ERROR: ".$this->DataBase->error)->paint("WHITE", "RED");
             $this->connect(); // here is not 'reconnect' because it is already disconnected
             return false;
         }
     }
 }
-
-?>
