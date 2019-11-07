@@ -130,7 +130,7 @@ class useful
         ->paint("BLACK", "LIGHTGRAY");
     }
     
-    public function date_to_words(string $date, $lang = null, $letters = null) {
+    public static function date_to_words(string $date, $lang = null, $letters = null) {
         $date = date_parse_from_format("Y-m-d", $date);
         $month = [
             "1" => "Января",
