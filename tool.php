@@ -1,24 +1,37 @@
 <?php
 
-$isIt = function ($it) use ($argv) {
-    unset($argv[0]);
-    $args = $argv;
-    foreach ($args as $index => $command) {
-        if ($command == "--".$it) {
-            return [
-                '_' => true,
-                'command' => isset($args[$index+1]) && !strstr($args[$index+1], "-") ? $args[$index+1]:null,
-            ];
-        }
+include 'bot/useful.php';
+useful::setUp([
+    "notice" => off,
+]);
+include 'bot/classes/database.php';
+
+$database = new AppName\abilities\DataBase(APPNAME_BOT_DIR."/database.json");
+$database->connect();
+$database->ping();
+
+unset($argv[0]);
+
+$isIt = function (string $command, object $closure) use (&$argv) {
+    $command = "--".$command;
+    if (in_array($command, $argv)) {
+        unset($argv[array_search($command, $argv)]);
+        $closure->__invoke($argv);
+        return true;
     }
 };
 
-include '/var/www/html/useful.php';
+$isIt("fuck", function ($commands) use (&$isIt) {
+    console("Fuck")
+        -> logln();
+    $isIt("you", function ($commands) use (&$isIt) {
+        console("you")
+        -> lnlog();
+        
+    });
+});
 
-$database = new DataBase("/var/www/html/database.json");
-$database->connect();
-
-if ($isIt("users")) {
+$isIt("users", function () use (&$database) {
     $result = $database->query("SELECT * FROM users");
     while ($row = $result->fetch_assoc()) {
         console($row['first_name']." (".$row['phone'].") => ")
@@ -29,10 +42,10 @@ if ($isIt("users")) {
         
         print PHP_EOL;
     }
-}
+});
 
-if ($isIt("op")) {
-    $result = $database->query("UPDATE users set extra = 'opped' WHERE user = '{$isIt("op")['command']}'");
+$isIt("op", function ($commands) use (&$database) {
+    $result = $database->query("UPDATE users set extra = 'opped' WHERE user = '{$commands[0]}'");
     if ($result) {
         console("Права успешно ввыданы!")
         -> paint("WHITE", "GREEN");
@@ -40,17 +53,27 @@ if ($isIt("op")) {
         console("Права не были ввыданы!")
         -> paint("WHITE", "RED");
     }
-}
+});
 
-if ($isIt("deop")) {
-    $result = $database->query("UPDATE users set extra = NULL WHERE user = '{$isIt("deop")['command']}'");
+$isIt("deop", function ($commands) use (&$database) {
+    $result = $database->query("UPDATE users set extra = NULL WHERE user = '{$commands[0]}'");
     if ($result) {
-        console("Права успешно сняты!")
+        console("Права успешно удалены!")
         -> paint("WHITE", "GREEN");
     } else {
-        console("Права не были сняты!")
+        console("Права не были удалены!")
         -> paint("WHITE", "RED");
     }
-}
+});
 
-?>
+$isIt("clear_name", function ($commands) use (&$database) {
+    $commands = implode(', ', $commands);
+    $result = $database->query("UPDATE users set phone = NULL WHERE user IN ($commands)");
+    if ($result) {
+        console("Успешно удалено!")
+        -> paint("WHITE", "GREEN");
+    } else {
+        console("Удалено не было!")
+        -> paint("WHITE", "RED");
+    }
+});
