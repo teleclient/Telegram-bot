@@ -159,4 +159,3 @@ class useful
         self::$settings = &$settings;
     }
 }
- 
