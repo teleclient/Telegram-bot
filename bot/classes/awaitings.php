@@ -2,33 +2,29 @@
 
 class awaitings
 {
-    public function __construct(Type $var = null) {
-        $functions = get_class_methods($this);
-        unset($functions[0]);
-        unset($functions[1]);
-        $this->functions = $functions;
-
-        $this->db = new DataBase();
-        $this->db->connect();
-        $this->db->ping();
+    public function __construct(object $db) {
+        $this->db = &$db;
     }
-    public function pullWith(array &$settings): array
+    public function pullWith(string $function, array $settings)
     {
-        $options = [];
-        foreach ($this->functions as $function) {
-            $options[$function] = call_user_func($function, $settings);
-        }
+        $options = yield $this->$function($settings);
+        $this->options[$function] = $options;
         return $options;
     }
     private function user(array $settings)
     {
-        $user = $settings['user'];
+        $user = &$settings['user'];
 
-        $this->db->ping();
-        $result = $this->db->query("SELECT * FROM users WHERE user = '$user'");
-        @$row = $result->fetch_assoc();
+        try {
+            yield $this->db->ping();
+            $result = yield $this->db->query("SELECT * FROM users WHERE user = '$user'");
+            $row = yield $result->fetch_assoc();
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
         return [
-            'isNew' => $result->num_rows == 0,
+            'givenData' => &$settings,
+            'isNew' => @$result->num_rows == 0,
             'hasName' => @$row['phone'] == NULL,
             'name' => @$row['phone'],
             'isOpped' => @$row['extra'] == "opped",

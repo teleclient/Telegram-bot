@@ -196,13 +196,13 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             $message = $update['message']['message'];
 
             switch (gettype($if)) {
-                case string:
+                case "string":
                     #$getif = $if == $message;
                     $getif = similar_text($if, $message, $percent) > 0 && $percent > 83;
                     print $percent;
                     break;
                 
-                case array:
+                case "array":
                     $getif = in_array($message, $if);
                     break;
             }
@@ -215,7 +215,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
                 ];
                 unset($options['_']);
 
-                if (gettype($closure) == object)
+                if (gettype($closure) == "object") 
                     foreach (yield $closure->__invoke() as $key => $value)
                         yield $options[$key] = &$value;
 
