@@ -37,11 +37,11 @@
                 </div>
                 <div class="admin-board__unit">
                     <label for="start_before">Начальное сообщение (До)</label>
-                    <input type="text" class="admin-board__input" id="start_before" value="<?php print $default['setInfo']['start_before']; ?>">
+                    <div contenteditable="true" class="admin-board__input textarea" id="start_before"><?php print $default['setInfo']['start_before']; ?></div>
                 </div>
                 <div class="admin-board__unit">
                     <label for="start_after">Начальное сообщение (После)</label>
-                    <input type="text" class="admin-board__input" id="start_after" value="<?php print $default['setInfo']['start_after']; ?>">
+                    <div contenteditable="true" class="admin-board__input textarea" id="start_after"><?php print $default['setInfo']['start_after']; ?></div>
                 </div>
                 <input type="submit" id="edit_info" class="admin-board__input" value="Изменить">
                 <!input type="submit" id="send_question" class="admin-board__input" value="Отправить">
@@ -54,6 +54,7 @@
     </div>
     <footer>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="/assets/js/scripts.js"></script>
         <script>
         $(document).ready(function() {
             $(document).on("click", "#edit_info", function(e) {
@@ -70,41 +71,47 @@
                     },
                 });
             });
+
+            //$(document).on("focusout", ".textarea", function () {
+                $(".textarea").each(function (index, unit) {
+                    var textarea_html = $(unit).html().wrapBetween(["%", "%"], "marked");
+                    $(unit).html(textarea_html);
+                });
+            //});
         });
 
-
         function process(option, hide = false) {
-                $(".admin-panel__process").removeClass("admin-panel__process--result admin-panel__process--error");
-                $(".admin-panel__icon").removeClass("admin-panel__icon--circle");
-                $(".admin-panel__icon").html(null);
-                if (option == "result") {
-                    $(".admin-panel__process")
-                        .addClass("admin-panel__process--result")
-                        .find(".admin-panel__text")
-                        .html("Сохранения были успешно применены!");
+            $(".admin-panel__process").removeClass("admin-panel__process--result admin-panel__process--error");
+            $(".admin-panel__icon").removeClass("admin-panel__icon--circle");
+            $(".admin-panel__icon").html(null);
+            if (option == "result") {
+                $(".admin-panel__process")
+                    .addClass("admin-panel__process--result")
+                    .find(".admin-panel__text")
+                    .html("Сохранения были успешно применены!");
 
-                    $(".admin-panel__process")
-                        .find(".admin-panel__icon")
-                        .html("&#10003;");
-                } else if (option == "error") {
-                    $(".admin-panel__process")
-                        .addClass("admin-panel__process--error")
-                        .find(".admin-panel__text")
-                        .html("Ошибка при сохранении (доп. в консоле)");
+                $(".admin-panel__process")
+                    .find(".admin-panel__icon")
+                    .html("&#10003;");
+            } else if (option == "error") {
+                $(".admin-panel__process")
+                    .addClass("admin-panel__process--error")
+                    .find(".admin-panel__text")
+                    .html("Ошибка при сохранении (доп. в консоле)");
 
-                    $(".admin-panel__process")
-                        .find(".admin-panel__icon")
-                        .html("&#128938;");
-                } else {
-                    $(".admin-panel__process").find(".admin-panel__text").html("Подождите идёт сохранение...");
-                    $(".admin-panel__icon").addClass("admin-panel__icon--circle");
-                }
-                $(".admin-panel__process").css({bottom: "-50px"});
-                
-                if (hide) {
-                    setTimeout(() => $(".admin-panel__process").css({bottom: 0}), 2000);
-                }
+                $(".admin-panel__process")
+                    .find(".admin-panel__icon")
+                    .html("&#128938;");
+            } else {
+                $(".admin-panel__process").find(".admin-panel__text").html("Подождите идёт сохранение...");
+                $(".admin-panel__icon").addClass("admin-panel__icon--circle");
             }
+            $(".admin-panel__process").css({bottom: "-50px"});
+            
+            if (hide) {
+                setTimeout(() => $(".admin-panel__process").css({bottom: 0}), 2000);
+            }
+        }
         </script>
     </footer>
 </body>

@@ -11,26 +11,45 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     public function __construct($MadelineProto)
     {
         parent::__construct($MadelineProto);
-        $this->db = new DataBase("/var/www/html/database.json");
-        $this->db->connect();
-        $this->db->ping();
-        $this->updateInfo();
+        $this->db = yield new DataBase("/var/www/html/database.json");
+        yield $this->db->connect();
+        yield $this->db->ping();
+
+        yield $this->updateInfo();
     }
-    public function forAllUsers(object $closure)
+    public function forUsers(object $closure, $random = false)
     {
+        $me = yield $this->get_self();
         $dialogs = yield $this->get_dialogs();
+
+        if ($random) shuffle($dialogs);
         foreach ($dialogs as $peer) {
-            if ($peer['user_id'] == 889432373) continue;
-            yield $closure->__invoke($peer);
+            if ($peer['user_id'] == $me['id']) continue;
+            $action = yield @$closure->__invoke($peer);
+            if ($action['_']) return $action['return'];
         }
     }
     public function updateInfo()
     {
-        $this->db->ping();
+        // Updating general information
         $result = $this->db->query("SELECT name, content FROM info");
         while (yield $row = $result->fetch_assoc()) {
             yield $this->info[$row['name']] = $row['content'];
         }
+
+        // Updating game options
+        $obtain = yield $this->obtain();
+        yield $message = "<b>{$obtain['header']},</b><br>{$obtain['text']}";
+        $options = [
+            'message' => $message,
+            'media' => [
+                '_' => 'inputMediaUploadedPhoto',
+                'file' => $obtain['picture'],
+            ],
+            'reply_markup' => $obtain['markups'],
+            'parse_mode' => 'HTML',
+        ];
+        $this->game['options'] = $options;
     }
     public function isOpped(int $user)
     {
@@ -42,32 +61,38 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     public function message(array $options)
     {
         try {
-            if (isset($options['media'])) {
-                yield $this->messages->sendMedia($options);
-                return;
-            }
-            if (isset($options['method']) && $options['method'] == "edit" || (isset($options['peer']['_']) && $options['peer']['_'] == "updateEditMessage")) {
-                $options['id'] = $options['peer']['message']['id']+1;
-                yield $this->messages->editMessage($options);
-                return;
-            }
-            if (!isset($options['method']) || $options['method'] == "send") {
-                yield $this->messages->sendMessage($options);
-                return;
+            switch ($options['method']) {
+                case "edit":
+                    if (!isset($options['id'])) {
+                        $options['id'] = $options['peer']['message']['id']+1;
+                    }
+                    yield $this->messages->editMessage($options);
+                    break;
+
+                case "media":
+                    yield $this->messages->sendMedia($options);
+                    break;
+                
+                default:
+                    yield $this->messages->sendMessage($options);
+                    break;
             }
         } catch (\danog\MadelineProto\RPCErrorException $e) {
             yield $this->messages->sendMessage(['peer' => 565324826, 'message' => $e]);
         }
     }
-    public function isWaiting($update, string $process)
+    public function isWaiting($data, string $process)
     {
-        $user = $update['message']['from_id'];
+        $user = is_int($data) ? $data:$data['message']['from_id'];
         $this->db->ping();
         switch($process) {
             case "phoneNumber":
                 $result = $this->db->query("SELECT id, user, phone FROM users WHERE user = '$user'");
                 $row = $result->fetch_assoc();
-                return $row['phone'] == NULL;
+                return [
+                    '_' => $row['phone'] == NULL,
+                    'this' => $row['phone'],
+                ];
 
                 break;
             case "newUser":
@@ -166,46 +191,129 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             $res = var_export($update, true);
         }
 
-        yield $this->messages->setTyping(['peer' => $update, 'action' => ['_' => 'sendMessageTypingAction']]);
+        yield $Message = function ($if, $closure) use (&$update) {
+            $peer = $update['message']['from_id'];
+            $message = $update['message']['message'];
 
-        if ($update['message']['message'] == "/start") {
-            $Chat = yield $this->get_info($update);
-            $options = [
-                'peer' => $update,
-                'message' => "Привет <b>{$Chat['User']['first_name']}</b><br>".$this->info['start_before'],
-                'parse_mode' => 'HTML',
-            ];
-            if (yield !$this->isWaiting($update, "phoneNumber")) {
-                $options['message'] = "Привет <b>{$Chat['User']['first_name']}</b><br>".$this->info['start_after'];
+            switch (gettype($if)) {
+                case "string":
+                    #$getif = $if == $message;
+                    $getif = similar_text($if, $message, $percent) > 0 && $percent > 83;
+                    print $percent;
+                    break;
+                
+                case "array":
+                    $getif = in_array($message, $if);
+                    break;
             }
-            try {
-                yield $this->messages->sendMessage($options);
-            } catch (\Throwable $e) {
-                print $e->getMessage();
-            }
-            return;
-        }
 
-        if ($update['message']['message'] == "/SendMessage") {
-            $obtain = yield $this->obtain();
-            yield $message = "<b>{$obtain['header']},</b><br>{$obtain['text']}";
-            yield $this->forAllUsers(function ($peer) use ($message, $obtain) {
-                $options = [
-                    'peer' => $peer,
-                    'message' => $message,
-                    'media' => [
-                        '_' => 'inputMediaUploadedPhoto',
-                        'file' => $obtain['picture'],
-                    ],
-                    'reply_markup' => $obtain['markups'],
+            if ($getif) {
+                $options = [ // Default options
+                    "peer" => &$update,
+                    "message" => "Default message",
                     'parse_mode' => 'HTML',
                 ];
+                unset($options['_']);
+
+                if (gettype($closure) == "object") 
+                    foreach (yield $closure->__invoke() as $key => $value)
+                        yield $options[$key] = &$value;
+
+                yield $this->message($options);
+                throw new Exception("OK");
+            }
+        };
+
+        if (yield $this->isWaiting($update, "newUser")) {
+            $Chat = yield $this->get_info($update);
+            $user = $update['message']['from_id'];
+            if (!isset($Chat['User']['first_name']) && empty($Chat['User']['first_name'])) $Chat['User']['first_name'] = null;
+            if (!isset($Chat['User']['last_name']) && empty($Chat['User']['last_name'])) $Chat['User']['last_name'] = null;
+            yield $this->db->query("INSERT INTO users (user, first_name, last_name) VALUES ('$user', '{$Chat['User']['first_name']}', '{$Chat['User']['last_name']}')");
+        }
+
+        try {
+
+            yield $Message("/start", function () use (&$update) {
+                $options = [
+                    'message' => $this->info['start_before'],
+                    'parse_mode' => 'HTML',
+                ];
+                
+                $Chat = yield $this->get_info($update);
+                $name = yield $this->isWaiting($update, "phoneNumber");
+                if (!$name['_']) {
+                    $start_after = str_replace('%name%', $name['this'], $this->info['start_after']);
+                    $options['message'] = $start_after;
+                }
+
+                return $options;
+            });
+
+            yield $Message("/start", [
+                '_' => [
+                    'rights' => [
+                        [
+                            '_' => 'UsersCanSee',
+                            'right' => 'yes',
+                        ],
+                    ],
+                ],
+                'message' => $this->info['start_before'],
+                'parse_mode' => 'HTML',
+            ]);
+
+            yield $Message("/start", function () {
+                return [
+                    '_' => [
+                        'rights' => [
+                            [
+                                '_' => 'UsersCanSee',
+                                'right' => 'yes',
+                            ],
+                        ],
+                    ],
+                    'message' => $this->info['start_before'],
+                    'parse_mode' => 'HTML',
+                ];
+            });
+
+        } catch (Exception $e) {
+            yield print $e->getMessage()."\r\nThe exception was created on line: " . $e->getLine();
+        }
+
+        if ($update['message']['message'] == "/SendMessage" && $this->isOpped($update['message']['from_id'])) {
+            yield $this->updateInfo();
+            $options = $this->game['options'];
+            yield $this->forUsers(function ($peer) use ($options) {
                 try {
+                    $options['peer'] = $peer;
                     yield $this->messages->sendMedia($options);
                 } catch (\Throwable $e) {
                     yield print $e->getMessage();
                 }
             });
+
+            return;
+        }
+
+        if ($update['message']['message'] == "/showWinner" && $this->isOpped($update['message']['from_id'])) {
+            $user = yield $this->forUsers(function ($peer) {
+                yield $user = $this->isWaiting($peer['user_id'], "phoneNumber");
+                if (!$user['_']) return ['_' => true, 'return' => $user];
+            }, true);
+
+            yield $this->forUsers(function ($peer) use ($user) {
+                try {
+                    $options['peer'] = $peer;
+                    $options['parse_mode'] = "HTML";
+                    $options['message'] = str_replace("%name%", $user['this'], $this->info['winner_message']);
+                    yield $this->messages->sendMessage($options);
+                } catch (\Throwable $e) {
+                    print $e->getMessage();
+                }
+            });
+
             return;
         }
 
@@ -224,29 +332,23 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             return;
         }
 
-        if (yield $this->isWaiting($update, "phoneNumber")) {
+        if (yield $this->isWaiting($update, "phoneNumber")['_']) {
             $user = $update['message']['from_id'];
             $phone = $update['message']['message'];
             yield $this->db->query("UPDATE users set phone = '$phone' WHERE user = '$user'");
             $options = [
                 'peer' => $update,
-                'message' => "Ваш телефон ({$update['message']['message']}) был подписан на рассылку! Вам будут приходить интересные сообщения.)",
+                #'message' => "Ваш телефон ({$update['message']['message']}) был подписан на рассылку! Вам будут приходить интересные сообщения.)",
                 'parse_mode' => 'HTML',
             ];
+            $start_after = str_replace('%name%', $phone, $this->info['start_after']);
+            $options['message'] = $start_after;
             try {
                 yield $this->messages->sendMessage($options);
             } catch (\Throwable $e) {
                 print $e->getMessage();
             }
             return;
-        }
-
-        if (yield $this->isWaiting($update, "newUser")) {
-            $Chat = yield $this->get_info($update);
-            $user = $update['message']['from_id'];
-            if (!isset($Chat['User']['first_name']) && empty($Chat['User']['first_name'])) $Chat['User']['first_name'] = null;
-            if (!isset($Chat['User']['last_name']) && empty($Chat['User']['last_name'])) $Chat['User']['last_name'] = null;
-            yield $this->db->query("INSERT INTO users (user, first_name, last_name) VALUES ('$user', '{$Chat['User']['first_name']}', '{$Chat['User']['last_name']}')");
         }
 
         try {
@@ -261,12 +363,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     }
 }
 
-$settings = [
-    'app_info' => [
-        #'api_id' => 12345678,
-        #'api_hash' => '1234567890ascsdasdasd',
-    ],
-];
+
 
 use danog\MadelineProto\MyTelegramOrgWrapper;
 
@@ -286,14 +383,14 @@ $wrapper->loop(function () use ($wrapper) {
         }
         
         \danog\MadelineProto\Logger::log($app);
-
     }
 });
 
 
-$MadelineProto = new \danog\MadelineProto\API('bot.session', $settings);
+$MadelineProto = new \danog\MadelineProto\API('bot2.session', $settings);
 $MadelineProto->async(true);
 $MadelineProto->loop(function () use ($MadelineProto) {
+#    yield $MadelineProto->bot_login('1039807617:AAG5S9Rca2qnS1CxehvUsuoZ-zjSMWMqGx8');
     yield $MadelineProto->start();
     yield $MadelineProto->setEventHandler('\EventHandler');
 });
