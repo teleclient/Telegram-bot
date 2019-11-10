@@ -3,7 +3,10 @@
 ini_set('error_display', 1);
 error_reporting(E_ALL);
 
-define("APPNAME_BOT_DIR", __DIR__);
+define("APPNAME_BOT_DIR", __DIR__."/bot");
+
+define("off", false);
+define("on", true);
 
 /**
      * Pretty colourful version of print, prints text into console
@@ -100,6 +103,11 @@ class log
     {
         if ($text) print($text); else print($this->print);
     }
+
+    public function lnlog($text = false)
+    {
+        if ($text) print(PHP_EOL.$text.PHP_EOL); else print(PHP_EOL.$this->print.PHP_EOL);
+    }
 }
 /**
  * This function resembles JavaScript function 'console'
@@ -112,6 +120,9 @@ function console(string $text) : object
 
 class useful
 {
+    public static $settings = [
+        "notice" => on,
+    ];
     public $print;
     public function __construct()
     {
@@ -119,7 +130,7 @@ class useful
         ->paint("BLACK", "LIGHTGRAY");
     }
     
-    public function date_to_words(string $date, $lang = null, $letters = null) {
+    public static function date_to_words(string $date, $lang = null, $letters = null) {
         $date = date_parse_from_format("Y-m-d", $date);
         $month = [
             "1" => "Января",
@@ -143,8 +154,8 @@ class useful
             "year" => $date["year"],
         ];
     }
+    public static function setUp(array $settings)
+    {
+        self::$settings = &$settings;
+    }
 }
-
-$useful = new useful();
-
-?>

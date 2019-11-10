@@ -4,7 +4,7 @@ if (!file_exists('madeline.php')) {
     copy('https://phar.madelineproto.xyz/madeline.php', 'madeline.php');
 }
 include 'madeline.php';
-include 'useful.php';
+include '../useful.php';
 include 'EventHandler.php';
 include 'classes/load.php';
     \AppName\abilities\load();
