@@ -2,13 +2,13 @@
 
 include 'useful.php';
 useful::setUp([
-    "notice" => off,
+    "notice" => on,
 ]);
 include 'bot/classes/database.php';
 
-#$database = new AppName\abilities\DataBase(APPNAME_BOT_DIR."/database.json");
-#$database->connect();
-#$database->ping();
+$database = new AppName\abilities\DataBase(APPNAME_BOT_DIR."/database.json");
+$database->connect();
+$database->ping();
 
 unset($argv[0]);
 
