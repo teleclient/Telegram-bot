@@ -25,7 +25,7 @@ class awaitings
         return [
             'givenData' => &$settings,
             'isNew' => @$result->num_rows == 0,
-            'hasName' => @$row['phone'] == NULL,
+            'hasName' => @$row['phone'] != NULL,
             'name' => @$row['phone'],
             'isOpped' => @$row['extra'] == "opped",
         ];

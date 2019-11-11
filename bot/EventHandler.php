@@ -5,7 +5,10 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     public function __construct($MadelineProto)
     {
         parent::__construct($MadelineProto);
-        $this->db = new \AppName\abilities\DataBase(__DIR__."/database.json");
+        useful::setUp([
+            "notice" => off,
+        ]);
+        $this->db = new \AppName\abilities\DataBase(APPNAME_BOT_DIR."/database.json");
         $this->stringer = new \AppName\abilities\stringer(APPNAME_BOT_DIR."/strings");
         $this->awaitings = new \AppName\abilities\awaitings($this->db);
         $this->info = $this->stringer->cat("bot");
@@ -72,32 +75,37 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         global $time;
         $time = microtime(true);
 
-        $awaitings = yield $this->awaitings->pullWith("user", [
+        $awaitings["user"] = yield $this->awaitings->pullWith("user", [
             "peer" => &$update['message']['from_id'],
             "message" => &$update['message']['message'],
         ]);
 
-        yield $handleMessage = function ($message, $closure) use (&$awaitings) {
-            if ($message != $awaitings['givenData']['message']) return;
+        yield $handleMessage = function ($message = false, $closure = null) use (&$awaitings) {
+            if ($message && $message != $awaitings['user']['givenData']['message']) return;
 
             global $time;
 
             $options = [ // Default options
-                "peer" => &$awaitings['givenData']['peer'],
+                "peer" => &$awaitings['user']['givenData']['peer'],
                 "message" => "Default message",
                 'parse_mode' => 'HTML',
             ];
             unset($options['_']);
 
             if (gettype($closure) == "object") 
-                array_merge($options, yield $closure->__invoke());
+                $options = yield array_merge($options, yield $closure->__invoke());
+            elseif (gettype($closure) == "array")
+                $options = yield array_merge($options, $closure);
+            else {
+                print_r($options);
+                $options['message'] .= ' in '.(microtime(true) - $time).' seconds';
+            }
 
-            print_r($options);
-            $options['message'] .= ' in '.(microtime(true) - $time).' seconds';
+
             yield $this->message($options);
             throw new Exception("OK");
         };
-        /*
+        #/*
         if ($awaitings['user']['isNew']) {
             $Chat = yield $this->get_info($update);
             $user = $update['message']['from_id'];
@@ -105,31 +113,10 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             if (!isset($Chat['User']['last_name']) && empty($Chat['User']['last_name'])) $Chat['User']['last_name'] = null;
             yield $this->db->query("INSERT INTO users (user, first_name, last_name) VALUES ('$user', '{$Chat['User']['first_name']}', '{$Chat['User']['last_name']}')");
         }
-        /*
-        try {
-
-            print $command = $update['message']['message'];
-            #$command = str_replace('/', '', $command);
-
-            // Check for entered commands
-            print_r($this->commands);
-            if (in_array($command, $this->commands)) {
-                $return = yield $this->$command($update, $awaitings);
-                print_r($return);
-                          yield $this->handle($update, $return);
-            }
-
-        } catch (Exception $e) {
-            yield print $e->getMessage()."\r\nThe exception was created on line: " . $e->getLine();
-        }
-        */
+        #*/
         yield $this->commands(function () use (&$handleMessage) {
 
-            yield $handleMessage("/begin", function () {
-                return [
-                    'message' => $this->info->message->before,
-                ];
-            });
+            yield $handleMessage(); // Test message
 
         });
         
