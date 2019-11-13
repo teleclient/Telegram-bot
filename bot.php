@@ -60,8 +60,10 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     }
     public function message(array $options)
     {
+        $method = $options['method'];
+        unset($options['method']);
         try {
-            switch ($options['method']) {
+            switch ($method) {
                 case "edit":
                     if (!isset($options['id'])) {
                         $options['id'] = $options['peer']['message']['id']+1;
@@ -191,7 +193,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             $res = var_export($update, true);
         }
 
-        yield $Message = function ($if, $closure) use (&$update) {
+        yield $Message = function ($if, $closure = null) use (&$update) {
             $peer = $update['message']['from_id'];
             $message = $update['message']['message'];
 
@@ -224,16 +226,10 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             }
         };
 
-        if (yield $this->isWaiting($update, "newUser")) {
-            $Chat = yield $this->get_info($update);
-            $user = $update['message']['from_id'];
-            if (!isset($Chat['User']['first_name']) && empty($Chat['User']['first_name'])) $Chat['User']['first_name'] = null;
-            if (!isset($Chat['User']['last_name']) && empty($Chat['User']['last_name'])) $Chat['User']['last_name'] = null;
-            yield $this->db->query("INSERT INTO users (user, first_name, last_name) VALUES ('$user', '{$Chat['User']['first_name']}', '{$Chat['User']['last_name']}')");
-        }
-
         try {
 
+            yield $Message("/yoll");
+            /*
             yield $Message("/start", function () use (&$update) {
                 $options = [
                     'message' => $this->info['start_before'],
@@ -277,11 +273,11 @@ class EventHandler extends \danog\MadelineProto\EventHandler
                     'parse_mode' => 'HTML',
                 ];
             });
-
+            */
         } catch (Exception $e) {
             yield print $e->getMessage()."\r\nThe exception was created on line: " . $e->getLine();
         }
-
+        /*
         if ($update['message']['message'] == "/SendMessage" && $this->isOpped($update['message']['from_id'])) {
             yield $this->updateInfo();
             $options = $this->game['options'];
@@ -350,7 +346,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             }
             return;
         }
-
+        */
         try {
             if (isset($update['message']['media']) && ($update['message']['media']['_'] == 'messageMediaPhoto' || $update['message']['media']['_'] == 'messageMediaDocument')) {
                 $time = microtime(true);
@@ -363,7 +359,8 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     }
 }
 
-
+$settings = file_get_contents(APPNAME_BOT_DIR . "/settings.json");
+$settings = json_decode($settings, true);
 
 use danog\MadelineProto\MyTelegramOrgWrapper;
 

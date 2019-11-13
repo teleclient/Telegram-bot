@@ -114,12 +114,40 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             yield $this->db->query("INSERT INTO users (user, first_name, last_name) VALUES ('$user', '{$Chat['User']['first_name']}', '{$Chat['User']['last_name']}')");
         }
         #*/
-        yield $this->commands(function () use (&$handleMessage) {
+        /*
+        yield $this->actions(function () use (&$handleMessage) {
 
             yield $handleMessage(); // Test message
 
         });
-        
+        */
+        yield $this->commands(function () use (&$handleMessage) {
+
+            #yield $handleMessage(); // Test message
+
+            yield $handleMessage("/yoll", [
+                "message" => "Arrrrgh..."
+            ]);
+
+            yield $handleMessage("/restart", function () {
+                exec("php ~/Github/Telegram-bot/bot/launcher.php", $output);
+                print_r($output);
+                die("Exit");
+            });
+
+        });
+        /*
+        yield $this->staffOnly(function () use (&$handleMessage) {
+
+            yield $handleMessage(); // Test message
+
+            yield $handleMessage("/restart", function () {
+                exec("php ~/Github/Telegram-bot/bot/launcher.php");
+                die("Exit");
+            });
+
+        });
+        */
         /*
         if ($update['message']['message'] == "/SendMessage" && $this->isOpped($update['message']['from_id'])) {
             yield $this->updateInfo();
