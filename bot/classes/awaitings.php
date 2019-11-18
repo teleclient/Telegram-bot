@@ -13,22 +13,23 @@ class awaitings
     }
     private function user(array $settings)
     {
-        $user = &$settings['user'];
+        $user = &$settings['peer'];
 
         try {
             yield $this->db->ping();
             $result = yield $this->db->query("SELECT * FROM users WHERE user = '$user'");
             $row = yield $result->fetch_assoc();
-        } catch (\Throwable $th) {
-            //throw $th;
+
+            return [
+                'givenData' => &$settings,
+                'isNew' => $result->num_rows == 0,
+                'hasName' => $row['phone'] != NULL,
+                'name' => $row['phone'],
+                'isOpped' => $row['extra'] == "opped",
+            ];
+        } catch (\Exception $e) {
+            print $e->getMessage();
         }
-        return [
-            'givenData' => &$settings,
-            'isNew' => @$result->num_rows == 0,
-            'hasName' => @$row['phone'] != NULL,
-            'name' => @$row['phone'],
-            'isOpped' => @$row['extra'] == "opped",
-        ];
     }
 }
 

@@ -27,6 +27,7 @@ class DataBase
                 $this->getSettings();
                 break;
         }
+        $this->connect();
     }
 
     public function getSettings() : array
@@ -74,7 +75,7 @@ class DataBase
     {
         try {
             if (!$this->DataBase) $this->ping();
-            if ($query != false) $result = $this->DataBase->query($query);
+            if ($query != false) $result = @$this->DataBase->query($query);
             if (isset($this->DataBase->errno) && $this->DataBase->errno) {
                 throw new \Exception("Failed to send a query to MySQL: (" . $this->DataBase->errno . ") " . $this->DataBase->error);
             }
@@ -87,16 +88,25 @@ class DataBase
     
     public function ping(int $loops = 1000)
     {
-        if ($this->DataBase && @$this->DataBase->ping()) {
-            if ($this->ping_loops % 5 == 0) if (\useful::$settings['notice']) console("Connection pinged - OK")->paint("WHITE", "CYAN");
-            if ($this->ping_loops > $loops) {
-                $this->reconnect();
-                $this->ping_loops = 0;
+        try {
+            if ($this->DataBase) {
+                if ($this->DataBase->error) {
+                    if (\useful::$settings['notice']) {
+                        if ($this->ping_loops % 5 == 0) console("Connection pinged - OK")->paint("WHITE", "CYAN");
+                    }
+                } elseif ($this->ping_loops > $loops) {
+                    $this->reconnect();
+                    $this->ping_loops = 0;
+                } else $this->ping_loops++;
+
+                //$this->DataBase->ping();
             }
-            $this->ping_loops++;
             return true;
-        } else {
-            if (\useful::$settings['notice']) console("Connection pinged - ERROR: ".$this->DataBase->error)->paint("WHITE", "RED");
+        } catch (\Excetion $e) {
+            if (\useful::$settings['notice']) {
+                console("Connection pinged - ERROR: ".$this->DataBase->error)->paint("WHITE", "RED");
+                print $e->getMessage();
+            }
             $this->connect(); // here is not 'reconnect' because it is already disconnected
             return false;
         }

@@ -12,6 +12,12 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         $this->stringer = new \AppName\abilities\stringer(APPNAME_BOT_DIR."/strings");
         $this->awaitings = new \AppName\abilities\awaitings($this->db);
         $this->info = $this->stringer->cat("bot");
+
+        yield $this->message([
+            "peer" => 
+            "message" => "Bot Started!",
+            "parse_mode" => "HTML",
+        ]);
     }
     public function onUpdateBotCallbackQuery($update)
     {
@@ -80,8 +86,13 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             "message" => &$update['message']['message'],
         ]);
 
-        yield $handleMessage = function ($message = false, $closure = null) use (&$awaitings) {
-            if ($message && $message != $awaitings['user']['givenData']['message']) return;
+        print_r($awaitings);
+
+        $handleMessage = function ($message = false, $closure = null, array $users = []) use (&$awaitings) {
+            if (
+                ($message && $message != $awaitings['user']['givenData']['message'])
+                || (empty($users) && !in_array($awaitings['user']['givenData']['peer'], $users))
+                ) return;
 
             global $time;
 
@@ -103,7 +114,8 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
 
             yield $this->message($options);
-            throw new Exception("OK");
+            if ($options['die']) die;
+            else throw new Exception("OK");
         };
         #/*
         if ($awaitings['user']['isNew']) {
@@ -123,31 +135,27 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         */
         yield $this->commands(function () use (&$handleMessage) {
 
-            #yield $handleMessage(); // Test message
-
             yield $handleMessage("/yoll", [
                 "message" => "Arrrrgh..."
             ]);
 
-            yield $handleMessage("/restart", function () {
-                exec("php ~/Github/Telegram-bot/bot/launcher.php", $output);
-                print_r($output);
-                die("Exit");
-            });
-
         });
-        /*
-        yield $this->staffOnly(function () use (&$handleMessage) {
+        #/*
+        yield $this->commands(function () use (&$handleMessage) {
 
-            yield $handleMessage(); // Test message
+            yield $handleMessage("/test"); // Test message
 
             yield $handleMessage("/restart", function () {
-                exec("php ~/Github/Telegram-bot/bot/launcher.php");
-                die("Exit");
-            });
+                $output = yield shell_exec("php ~koto/Github/Telegram-bot/bot/launcher.php > null &");
+                yield print_r($output);
+                return [
+                    "message" => "Restarting...",
+                    "die" => true,
+                ];
+            }, [565324826, ]);
 
         });
-        */
+        #*/
         /*
         if ($update['message']['message'] == "/SendMessage" && $this->isOpped($update['message']['from_id'])) {
             yield $this->updateInfo();
