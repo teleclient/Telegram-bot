@@ -14,7 +14,7 @@ include 'classes/load.php';
 $settings = file_get_contents(APPNAME_BOT_DIR . "/settings.json");
 $settings = json_decode($settings, true);
 
-#include 'login_helper.php';
+#include 'login_helper.php'; // may not start without this
 $MadelineProto = new \danog\MadelineProto\API('sessions/bot.session', $settings);
 $MadelineProto->async(true);
 $MadelineProto->loop(function () use ($MadelineProto) {

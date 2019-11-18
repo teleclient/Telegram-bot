@@ -60,8 +60,11 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     }
     public function message(array $options)
     {
-        $method = $options['method'];
-        unset($options['method']);
+        if (isset($options['method'])) {
+            $method = $options['method'];
+            unset($options['method']);
+        } else $method = "xer";
+
         try {
             switch ($method) {
                 case "edit":

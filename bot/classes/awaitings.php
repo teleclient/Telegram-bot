@@ -13,11 +13,9 @@ class awaitings
     }
     private function user(array $settings)
     {
-        $user = &$settings['peer'];
-
         try {
             yield $this->db->ping();
-            $result = yield $this->db->query("SELECT * FROM users WHERE user = '$user'");
+            $result = yield $this->db->query("SELECT * FROM users WHERE user = '{$settings['peer']}'");
             $row = yield $result->fetch_assoc();
 
             return [

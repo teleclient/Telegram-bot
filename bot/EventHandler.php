@@ -12,12 +12,6 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         $this->stringer = new \AppName\abilities\stringer(APPNAME_BOT_DIR."/strings");
         $this->awaitings = new \AppName\abilities\awaitings($this->db);
         $this->info = $this->stringer->cat("bot");
-
-        yield $this->message([
-            "peer" => 
-            "message" => "Bot Started!",
-            "parse_mode" => "HTML",
-        ]);
     }
     public function onUpdateBotCallbackQuery($update)
     {
@@ -91,7 +85,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         $handleMessage = function ($message = false, $closure = null, array $users = []) use (&$awaitings) {
             if (
                 ($message && $message != $awaitings['user']['givenData']['message'])
-                || (empty($users) && !in_array($awaitings['user']['givenData']['peer'], $users))
+                || (!empty($users) && !in_array($awaitings['user']['givenData']['peer'], $users))
                 ) return;
 
             global $time;
@@ -114,10 +108,10 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
 
             yield $this->message($options);
-            if ($options['die']) die;
+            if (isset($options['die'])) die;
             else throw new Exception("OK");
         };
-        #/*
+        /*
         if ($awaitings['user']['isNew']) {
             $Chat = yield $this->get_info($update);
             $user = $update['message']['from_id'];
