@@ -3,4 +3,5 @@
 *.lock
 *.session
 bot/null
+actions-runner
 *.log
