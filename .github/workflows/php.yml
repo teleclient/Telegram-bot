@@ -10,12 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
-
     - name: Check running
       run: php /home/koto/Github/Telegram-bot/start.php
 
