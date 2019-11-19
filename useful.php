@@ -158,4 +158,14 @@ class useful
     {
         self::$settings = &$settings;
     }
+
+    public static function getGeo()
+    {
+        $ip = shell_exec('curl https://ipinfo.io/ip');
+        $geo = shell_exec('curl https://ipvigilante.com/'.$ip);
+        $geo = json_decode($geo);
+        #print_r($geo->data);
+
+        return $geo->data->country_name;
+    }
 }

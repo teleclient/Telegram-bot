@@ -102,7 +102,6 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             elseif (gettype($closure) == "array")
                 $options = yield array_merge($options, $closure);
             else {
-                print_r($options);
                 $options['message'] .= ' in '.(microtime(true) - $time).' seconds';
             }
 
@@ -129,6 +128,8 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         */
         yield $this->commands(function () use (&$handleMessage) {
 
+            yield \AppName\bot\cluster($handleMessage);
+
             yield $handleMessage("/yoll", [
                 "message" => "Arrrrgh..."
             ]);
@@ -139,9 +140,19 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
             yield $handleMessage("/test"); // Test message
 
+            yield $handleMessage("/updateInfo", function () use (&$awaitings) {
+                if ($awaitings['user']['isOpped']) {
+                    yield $this->updateInfo();
+                    return $options = [
+                        'peer' => $update,
+                        'message' => "Данные были обновлены",
+                        'parse_mode' => 'HTML',
+                    ];
+                }
+            });
+
             yield $handleMessage("/restart", function () {
-                $output = yield shell_exec("php ~koto/Github/Telegram-bot/bot/launcher.php > null &");
-                yield print_r($output);
+                $output = yield shell_exec("php ../start.php > ../bot.log &");
                 return [
                     "message" => "Restarting...",
                     "die" => true,
