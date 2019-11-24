@@ -136,7 +136,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
         });
         #/*
-        yield $this->commands(function () use (&$handleMessage) {
+        yield $this->commands(function () use (&$handleMessage, &$awaitings) {
 
             yield $handleMessage("/test"); // Test message
 
@@ -144,7 +144,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
                 if ($awaitings['user']['isOpped']) {
                     yield $this->updateInfo();
                     return $options = [
-                        'peer' => $update,
+                        'peer' => $awaitings["user"]["givenData"]["peer"],
                         'message' => "Данные были обновлены",
                         'parse_mode' => 'HTML',
                     ];
