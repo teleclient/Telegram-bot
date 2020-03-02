@@ -9,7 +9,8 @@ include 'EventHandler.php';
 include 'classes/load.php';
     \AppName\abilities\load();
 
-
+// Loading Cluster
+include "../cluster.php";
 
 $settings = file_get_contents(APPNAME_BOT_DIR . "/settings.json");
 $settings = json_decode($settings, true);
