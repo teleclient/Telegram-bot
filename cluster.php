@@ -1,18 +1,12 @@
-<?php namespace AppName\bot\cluster;
+<?php
 
-yield HandleMessage("/jopa", [
-    "message" => "Hello there fucking bullshit",
+BOT::info([
+    ""
 ]);
 
-yield HandleMessage("/jopa", function(&$data) {
-    if ($data[])
-    return [
-        "message" => "Hello there fucking bullshit",
-    ]
-});
-
-$BOT->handle->message("/jopa", function (&$data) {
-    
-});
+Handler::message();
+Handler::onMessage();
+BOT::message();
+BOT::onMessage();
 
 ?>
