@@ -2,9 +2,9 @@
 
 class DataBase
 {
-    public $config;
-    private $DataBase;
-    private $config_file = (__DIR__)."/database.json"; // It's niether a straight path to file or just a file
+    public $DataBase;
+    private $config;
+    private $config_file = (__DIR__) . "/database.json"; // Config file path
     private $ping_loops = 0;
     
     /**
@@ -30,7 +30,7 @@ class DataBase
         $this->connect();
     }
 
-    public function getSettings() : array
+    private function getSettings() : array
     {
         if (file_exists($this->config_file)) {
             $file = file_get_contents($this->config_file);
@@ -40,7 +40,7 @@ class DataBase
         return $this->config = $config;
     }
 
-    public function setSettings(array $settings)
+    private function setSettings(array $settings)
     {
         $this->config = $settings;
         $data = json_encode($settings, JSON_PRETTY_PRINT);

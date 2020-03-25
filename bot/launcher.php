@@ -15,7 +15,7 @@ include "../cluster.php";
 $settings = file_get_contents(APPNAME_BOT_DIR . "/settings.json");
 $settings = json_decode($settings, true);
 
-#include 'login_helper.php'; // may not start without this
+#include 'login_helper.php';
 $MadelineProto = new \danog\MadelineProto\API('sessions/bot.session', $settings);
 $MadelineProto->async(true);
 $MadelineProto->resetUpdateState();

@@ -2,16 +2,18 @@
 
 class EventHandler extends \danog\MadelineProto\EventHandler
 {
+    private $awaitings;
+    private $info;
     public function __construct($MadelineProto)
     {
         parent::__construct($MadelineProto);
         useful::setUp([
             "notice" => off,
         ]);
-        $this->db = new \AppName\abilities\DataBase(APPNAME_BOT_DIR."/database.json");
-        $this->stringer = new \AppName\abilities\stringer(APPNAME_BOT_DIR."/strings");
-        $this->awaitings = new \AppName\abilities\awaitings($this->db);
-        $this->info = $this->stringer->cat("bot");
+        $db = new \AppName\abilities\DataBase(APPNAME_BOT_DIR . "/database.json");
+        $stringer = new \AppName\abilities\stringer(APPNAME_BOT_DIR . "/strings");
+        $this->awaitings = new \AppName\abilities\awaitings($db);
+        $this->info = $stringer->cat("bot");
     }
     public function onUpdateBotCallbackQuery($update)
     {

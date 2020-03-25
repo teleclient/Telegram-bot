@@ -1,19 +1,9 @@
 <?php
 
-function HandleMessage() {
-    print $argv;
-}
+include "useful.php";
+include "bot/classes/database.php";
 
-function generator() {
-    yield 123;
-    yield 123;
-    yield 123;
-    yield 123;
-}
-
-foreach (generator() as $value) {
-    print $value . PHP_EOL;
-}
-
+$db = new \AppName\abilities\DataBase("bot/database.json");
+print_r($db);
 
 ?>

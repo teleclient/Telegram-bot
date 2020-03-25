@@ -1,12 +1,7 @@
-<?php
+<?php namespace AppName\bot;
 
-BOT::info([
-    ""
-]);
+function cluster($handleMessage) {
+    yield $handleMessage("/jopa");
+}
 
-Handler::message();
-Handler::onMessage();
-BOT::message();
-BOT::onMessage();
-
-?>
+?> 

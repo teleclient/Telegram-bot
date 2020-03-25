@@ -61,15 +61,11 @@ function ___install_madeline()
         $release_branch = '';
     }
     $release_fallback_branch = '';
-    /*if (isset($_SERVER['SERVER_ADMIN']) && strpos($_SERVER['SERVER_ADMIN'], '000webhost.io') && $custom_branch === null) {
-        $release_branch = '-deprecated';
-        $release_fallback_branch = '-deprecated';
-    }*/
 
     if (PHP_MAJOR_VERSION <= 5) {
         $release_branch = '5'.$release_branch;
         $release_fallback_branch = '5'.$release_fallback_branch;
-    } elseif (PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION === 0) {
+    } elseif (PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION < 4) {
         $release_branch = '70'.$release_branch;
         $release_fallback_branch = '70'.$release_fallback_branch;
     }
@@ -86,12 +82,53 @@ function ___install_madeline()
         $phar = \file_get_contents(\sprintf($phar_template, $release_branch));
 
         if ($phar) {
+            $extractVersions = static function ($ext = '') {
+                if (!\file_exists("phar://madeline.phar$ext/vendor/composer/installed.json")) {
+                    return [];
+                }
+                $composer = \json_decode(\file_get_contents("phar://madeline.phar$ext/vendor/composer/installed.json"), true) ?: [];
+                $packages = [];
+                foreach ($composer as $dep) {
+                    $packages[$dep['name']] = $dep['version_normalized'];
+                }
+                return $packages;
+            };
+            $previous = [];
+            if (\file_exists('madeline.phar')) {
+                \copy('madeline.phar', 'madeline.phar.old');
+                $previous = $extractVersions('.old');
+                \unlink('madeline.phar.old');
+            }
+            $previous['danog/madelineproto'] = 'old';
+
             \file_put_contents('madeline.phar', $phar);
             \file_put_contents('madeline.phar.version', $release);
+
+            $current = $extractVersions();
+            $postData = ['downloads' => []];
+            foreach ($current as $name => $version) {
+                if (isset($previous[$name]) && $previous[$name] === $version) {
+                    continue;
+                }
+                $postData['downloads'][] = [
+                    'name' => $name,
+                    'version' => $version
+                ];
+            }
+
+            $opts = ['http' =>
+                [
+                    'method' => 'POST',
+                    'header' => ['Content-Type: application/json'],
+                    'content' => \json_encode($postData),
+                    'timeout' => 6,
+                ],
+            ];
+            @\file_get_contents("https://packagist.org/downloads/", false, \stream_context_create($opts));
         }
     }
 }
 
 ___install_madeline();
 
-require 'madeline.phar';
+return require_once 'madeline.phar';

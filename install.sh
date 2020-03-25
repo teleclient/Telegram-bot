@@ -10,5 +10,6 @@ sudo apt-get install php7.3
 sudo apt-get install php7.3-curl
 sudo apt-get install php7.3-xml
 sudo apt-get install php7.3-mysqli
+sudo apt-get install php7.3-mbstring
 sudo apt-get install mysql
 sudo apt-get update
