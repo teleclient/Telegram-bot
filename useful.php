@@ -164,16 +164,40 @@ class useful
         $ip = shell_exec('curl https://ipinfo.io/ip');
         $geo = shell_exec('curl https://ipvigilante.com/'.$ip);
         $geo = json_decode($geo);
-        #print_r($geo->data);
+        print_r($geo->data);
 
         return $geo->data->country_name;
     }
 }
 
+class promise
+{
+    private $thenObject;
+    public $status;
+    public function __construct(object $then = null) {
+        $this->status = "pending";
+        $this->thenObject = $then != null ? $then : function () {};
+    }
+
+    public function resolve() : void
+    {
+        $this->status = "resolved";
+        $this->thenObject->__invoke();
+    }
+
+    public function then(object $then) : void
+    {
+        $this->thenObject = $then;
+    }
+}
+
+
 class tyre {
     static public $BidsArray = [];
-    public function __construct(int $foo) {
-        $this->foo = $foo;
+    public function __construct() {
+        console(" Magitued :: starting...")->paint("BROWN");
+        sleep(3);
+        console(" Magitued :: started")->paint("BROWN");
     }
     public function addBid(string $name, object $execution = null) : void
     {
