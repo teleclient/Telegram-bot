@@ -1,7 +1,17 @@
-<?php namespace AppName\bot;
+<?php namespace AppName\bot\foreground;
 
-function cluster($handleMessage) {
-    yield $handleMessage("/jopa");
-}
+cluster::AddHandler([
+    "command" => "/hahui",
+    "message" => "Good day, Sir!",
+    "eval" => cluster::Eval(function (&$thisArray) {
+        $thisArray["message"] .= " - You got zalupa, Sir.";
+        print_r($thisArray);
+    }),
+]);
+
+cluster::AddHandler([
+    "command" => "jopa",
+    "message" => "Anal, then."
+]);
 
 ?> 

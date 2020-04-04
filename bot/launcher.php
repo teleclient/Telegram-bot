@@ -3,14 +3,17 @@
 if (!file_exists('madeline.php')) {
     copy('https://phar.madelineproto.xyz/madeline.php', 'madeline.php');
 }
-include 'madeline.php';
-include_once '../useful.php';
-include 'EventHandler.php';
-include 'classes/load.php';
-    \AppName\abilities\load();
 
-// Loading Cluster
+include 'madeline.php';
+
+
+include_once '../useful.php';
+include 'classes/load.php';
+
+// Commands Cluster
 include "../cluster.php";
+// Event Handler
+include 'EventHandler.php';
 
 $settings = file_get_contents(APPNAME_BOT_DIR . "/settings.json");
 $settings = json_decode($settings, true);

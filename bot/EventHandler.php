@@ -76,13 +76,13 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 
         global $time;
         $time = microtime(true);
-
+        
+        /*
         $awaitings["user"] = yield $this->awaitings->pullWith("user", [
             "peer" => &$update['message']['from_id'],
             "message" => &$update['message']['message'],
         ]);
-
-        print_r($awaitings);
+        
 
         $handleMessage = function ($message = false, $closure = null, array $users = []) use (&$awaitings) {
             if (
@@ -112,127 +112,34 @@ class EventHandler extends \danog\MadelineProto\EventHandler
             if (isset($options['die'])) die;
             else throw new Exception("OK");
         };
-        /*
-        if ($awaitings['user']['isNew']) {
+
+        if ($awaitings['user']['isNew'] && false) {
             $Chat = yield $this->get_info($update);
             $user = $update['message']['from_id'];
             if (!isset($Chat['User']['first_name']) && empty($Chat['User']['first_name'])) $Chat['User']['first_name'] = null;
             if (!isset($Chat['User']['last_name']) && empty($Chat['User']['last_name'])) $Chat['User']['last_name'] = null;
             yield $this->db->query("INSERT INTO users (user, first_name, last_name) VALUES ('$user', '{$Chat['User']['first_name']}', '{$Chat['User']['last_name']}')");
         }
-        #*/
-        /*
-        yield $this->actions(function () use (&$handleMessage) {
 
-            yield $handleMessage(); // Test message
-
-        });
         */
-        yield $this->commands(function () use (&$handleMessage) {
-
-            yield \AppName\bot\cluster($handleMessage);
-
-            yield $handleMessage("/yoll", [
-                "message" => "Arrrrgh..."
-            ]);
-
-        });
-        #/*
-        yield $this->commands(function () use (&$handleMessage, &$awaitings) {
-
-            yield $handleMessage("/test"); // Test message
-
-            yield $handleMessage("/updateInfo", function () use (&$awaitings) {
-                if ($awaitings['user']['isOpped']) {
-                    yield $this->updateInfo();
-                    return $options = [
-                        'peer' => $awaitings["user"]["givenData"]["peer"],
-                        'message' => "Данные были обновлены",
-                        'parse_mode' => 'HTML',
-                    ];
-                }
-            });
-
-            yield $handleMessage("/restart", function () {
-                $output = yield shell_exec("php ../start.php > ../bot.log &");
-                return [
-                    "message" => "Restarting...",
-                    "die" => true,
-                ];
-            }, [565324826, ]);
-
-        });
-        #*/
-        /*
-        if ($update['message']['message'] == "/SendMessage" && $this->isOpped($update['message']['from_id'])) {
-            yield $this->updateInfo();
-            $options = $this->game['options'];
-            yield $this->forUsers(function ($peer) use ($options) {
-                try {
-                    $options['peer'] = $peer;
-                    yield $this->messages->sendMedia($options);
-                } catch (\Throwable $e) {
-                    yield print $e->getMessage();
-                }
-            });
-
-            return;
-        }
-
-        if ($update['message']['message'] == "/showWinner" && $this->isOpped($update['message']['from_id'])) {
-            $user = yield $this->forUsers(function ($peer) {
-                yield $user = $this->isWaiting($peer['user_id'], "phoneNumber");
-                if (!$user['_']) return ['_' => true, 'return' => $user];
-            }, true);
-
-            yield $this->forUsers(function ($peer) use ($user) {
-                try {
-                    $options['peer'] = $peer;
-                    $options['parse_mode'] = "HTML";
-                    $options['message'] = str_replace("%name%", $user['this'], $this->info['winner_message']);
-                    yield $this->messages->sendMessage($options);
-                } catch (\Throwable $e) {
-                    print $e->getMessage();
-                }
-            });
-
-            return;
-        }
-
-        if ($update['message']['message'] == "/updateInfo" && $this->isOpped($update['message']['from_id'])) {
-            yield $this->updateInfo();
-            yield $options = [
-                'peer' => $update,
-                'message' => "Данные были обновлены",
-                'parse_mode' => 'HTML',
-            ];
-            try {
-                yield $this->messages->sendMessage($options);
-            } catch (\Throwable $e) {
-                print $e->getMessage();
+        
+        yield $this->commands(function () use (&$handleMessage, &$update) {
+            global $time;
+            $HandlersArray = &\AppName\bot\foreground\cluster::$HandlersArray;
+            $message = $update["message"]["message"];
+            if (isset($HandlersArray[$message])) {
+                $HandlerArray = $HandlersArray[$message];
+                isset($HandlerArray["eval"]) ? true : $HandlerArray["eval"] = function () { };
+                yield $HandlerArray["eval"]($HandlerArray);
+                yield $this->message([
+                    "peer" => $update['message']['from_id'],
+                    "message" => $HandlerArray["message"] . ' in ' . (microtime(true) - $time).' seconds',
+                    'parse_mode' => 'HTML',
+                ]);
+                //yield $handleMessage($message);
             }
-            return;
-        }
+        });
 
-        if (yield $this->isWaiting($update, "phoneNumber")['_']) {
-            $user = $update['message']['from_id'];
-            $phone = $update['message']['message'];
-            yield $this->db->query("UPDATE users set phone = '$phone' WHERE user = '$user'");
-            $options = [
-                'peer' => $update,
-                #'message' => "Ваш телефон ({$update['message']['message']}) был подписан на рассылку! Вам будут приходить интересные сообщения.)",
-                'parse_mode' => 'HTML',
-            ];
-            $start_after = str_replace('%name%', $phone, $this->info['start_after']);
-            $options['message'] = $start_after;
-            try {
-                yield $this->messages->sendMessage($options);
-            } catch (\Throwable $e) {
-                print $e->getMessage();
-            }
-            return;
-        }
-        */
         try {
             if (isset($update['message']['media']) && ($update['message']['media']['_'] == 'messageMediaPhoto' || $update['message']['media']['_'] == 'messageMediaDocument')) {
                 $time = microtime(true);
