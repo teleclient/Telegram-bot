@@ -3,7 +3,7 @@
 cluster::AddHandler([
     "command" => "/hahui",
     "message" => "Good day, Sir!",
-    "eval" => cluster::Eval(function (&$thisArray) {
+    "eval" => cluster::Eval(function (&$thisArray,) {
         $thisArray["message"] .= " - You got zalupa, Sir.";
         print_r($thisArray);
     }),

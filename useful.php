@@ -169,3 +169,18 @@ class useful
         return $geo->data->country_name;
     }
 }
+
+class tyre {
+    static public $BidsArray = [];
+    public function __construct(int $foo) {
+        $this->foo = $foo;
+    }
+    public function addBid(string $name, object $execution = null) : void
+    {
+        
+    }
+    static public function search(string $crumbs) : string
+    {
+        return $crumbs;
+    }
+}
