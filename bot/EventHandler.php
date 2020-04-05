@@ -10,9 +10,9 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         useful::setUp([
             "notice" => off,
         ]);
-        $db = new \AppName\abilities\DataBase(APPNAME_BOT_DIR . "/database.json");
-        $stringer = new \AppName\abilities\stringer(APPNAME_BOT_DIR . "/strings");
-        $this->awaitings = new \AppName\abilities\awaitings($db);
+        $db = new \Magitued\abilities\DataBase(Magitued_BOT_DIR . "/database.json");
+        $stringer = new \Magitued\abilities\stringer(Magitued_BOT_DIR . "/strings");
+        $this->awaitings = new \Magitued\abilities\awaitings($db);
         $this->info = $stringer->cat("bot");
     }
     public function onUpdateBotCallbackQuery($update)
@@ -125,7 +125,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         
         yield $this->commands(function () use (&$handleMessage, &$update) {
             global $time;
-            $HandlersArray = &\AppName\bot\foreground\cluster::$HandlersArray;
+            $HandlersArray = &\Magitued\bot\foreground\cluster::$HandlersArray;
             $message = $update["message"]["message"];
             if (isset($HandlersArray[$message])) {
                 $HandlerArray = $HandlersArray[$message];

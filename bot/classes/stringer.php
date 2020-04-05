@@ -1,4 +1,4 @@
-<?php namespace AppName\abilities;
+<?php namespace Magitued\abilities;
 
 /**
  * Stringer simplyfize data maintaining

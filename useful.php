@@ -3,10 +3,12 @@
 ini_set('error_display', 1);
 error_reporting(E_ALL);
 
-define("APPNAME_BOT_DIR", __DIR__."/bot");
+define("Magitued_BOT_DIR", __DIR__."/bot");
 
 define("off", false);
 define("on", true);
+
+shell_exec("alias Magitued='php magitued.php'");
 
 /**
      * Pretty colourful version of print, prints text into console
@@ -193,18 +195,21 @@ class promise
 
 
 class tyre {
-    static public $BidsArray = [];
-    public function __construct() {
-        console(" Magitued :: starting...")->paint("BROWN");
-        sleep(3);
-        console(" Magitued :: started")->paint("BROWN");
+    static private $BidsArray = [];
+    public function __construct(string $name, object $execution = null) {
+        self::$BidsArray[$name] = $execution;
     }
-    public function addBid(string $name, object $execution = null) : void
+    static public function begin(object $startFunction = null) : void
     {
-        
-    }
-    static public function search(string $crumbs) : string
-    {
-        return $crumbs;
+        $startFunction->__invoke();
+        foreach ($GLOBALS["argv"] as $index => $value) {
+            if ($index == 0) {
+                console("> Magitued has arranged " . $value)->paint("LIGHTGREEN");
+                return;
+            }
+            if (isset(self::$BidsArray[$value])) {
+                self::$BidsArray[$value]->__invoke();
+            }   
+        }
     }
 }

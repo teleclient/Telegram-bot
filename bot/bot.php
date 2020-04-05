@@ -362,7 +362,7 @@ class EventHandler extends \danog\MadelineProto\EventHandler
     }
 }
 
-$settings = file_get_contents(APPNAME_BOT_DIR . "/settings.json");
+$settings = file_get_contents(Magitued_BOT_DIR . "/settings.json");
 $settings = json_decode($settings, true);
 
 use danog\MadelineProto\MyTelegramOrgWrapper;

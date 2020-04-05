@@ -6,7 +6,7 @@ useful::setUp([
 ]);
 include 'bot/classes/database.php';
 
-$database = new AppName\abilities\DataBase(APPNAME_BOT_DIR."/database.json");
+$database = new Magitued\abilities\DataBase(Magitued_BOT_DIR."/database.json");
 $database->connect();
 $database->ping();
 

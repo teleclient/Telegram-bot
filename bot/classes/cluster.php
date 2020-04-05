@@ -1,4 +1,4 @@
-<?php namespace AppName\bot\foreground;
+<?php namespace Magitued\bot\foreground;
 
 class cluster
 {

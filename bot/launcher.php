@@ -15,7 +15,7 @@ include "../cluster.php";
 // Event Handler
 include 'EventHandler.php';
 
-$settings = file_get_contents(APPNAME_BOT_DIR . "/settings.json");
+$settings = file_get_contents(Magitued_BOT_DIR . "/settings.json");
 $settings = json_decode($settings, true);
 
 #include 'login_helper.php';
