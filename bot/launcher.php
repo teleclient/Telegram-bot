@@ -22,8 +22,12 @@ $settings = json_decode($settings, true);
 $MadelineProto = new \danog\MadelineProto\API('sessions/bot.session', $settings);
 $MadelineProto->async(true);
 $MadelineProto->resetUpdateState();
-$MadelineProto->loop(function () use ($MadelineProto) {
+$MadelineProto->loop(function () use (&$MadelineProto) {
     yield $MadelineProto->start();
     yield $MadelineProto->setEventHandler('\Matter');
+    yield $MadelineProto->messages->sendMessage([
+        "peer" => 565324826,
+        "message" => "Bot's started by Magitued.",
+    ]);
 });
 $MadelineProto->loop();

@@ -1,8 +1,9 @@
 <?php
 
-include "useful.php";
+include_once "useful.php";
 
 new tyre("start", function () {
+    console("> Magitued is working...");
     include "start.php";
 });
 

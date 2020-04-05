@@ -122,14 +122,18 @@ function console(string $text) : object
 
 class useful
 {
+    private static $included = false;
+    private static $geo;
+    public static $proceedRail;
     public static $settings = [
         "notice" => on,
     ];
     public $print;
     public function __construct()
     {
-        console("Hello, I'm constructed and ready to help you because I'm the most useful class ever!")
-        ->paint("BLACK", "LIGHTGRAY");
+        self::$included = true;
+        #console("Hello, I'm constructed and ready to help you because I'm the most useful class ever!")
+        #->paint("BLACK", "LIGHTGRAY");
     }
     
     public static function date_to_words(string $date, $lang = null, $letters = null) {
@@ -156,19 +160,52 @@ class useful
             "year" => $date["year"],
         ];
     }
-    public static function setUp(array $settings)
+    public static function setUp(array $settings) : void
     {
         self::$settings = &$settings;
     }
 
-    public static function getGeo()
+    public static function getGeo() : string
     {
-        $ip = shell_exec('curl https://ipinfo.io/ip');
-        $geo = shell_exec('curl https://ipvigilante.com/'.$ip);
-        $geo = json_decode($geo);
-        print_r($geo->data);
-
-        return $geo->data->country_name;
+        console("> Magitued's checking your location...")->logln();
+        exec("curl 'https://ipinfo.io/ip' 2>&1", $ip);
+        exec("curl 'https://ipvigilante.com/{$ip[3]}' 2>&1", $geo);
+        $geo = json_decode($geo[3]);
+        if (empty($geo)) {
+            exec("curl 'http://api.ipstack.com/{$ip[3]}?access_key=85a5ab5f21fe531734747eaf732a6ee3' 2>&1", $geo);
+            $data = json_decode($geo[3]);    
+        } else $data = $geo->data;
+        console($data->country_name)->log();
+        return self::$geo = $data->country_name;
+    }
+    public static function proceed(string $file) : void
+    {
+        $step = [
+            0 => false,
+            1 => true,
+            2 => "Trying to connect to Telegram servers...",
+            3 => "Successfully connected to Telegram servers.",
+            4 => "Magitued Bot has been started!",
+            "Blocked" => "As your server is whitin the Telegram-Blocked area, establishing connection through a proxy...",
+            "Connected" => "Proxy connection esablished.",
+        ][self::$proceedRail];
+        while ($step) {
+            // Clearing states
+            self::$proceedRail = 1;
+            usleep(100000);
+            // Get size of $file
+            $file_size = filesize($file);
+            // ifs 
+            //if (self::$geo) {
+                //if ($file_size > 0) self::$proceedRail = "Blocked";
+                if ($file_size > 1200) self::$proceedRail = "Connected";
+            //}
+            if ($file_size > 1400) self::$proceedRail = 2;
+            if ($file_size > 5000) self::$proceedRail = 3;
+            if ($file_size > 20000) self::$proceedRail = 4;
+            if ($step !== true) console($step)->log();
+            if ($file_size > 20000) self::$proceedRail = 0;
+        }
     }
 }
 
@@ -202,13 +239,13 @@ class tyre {
     static public function begin(object $startFunction = null) : void
     {
         $startFunction->__invoke();
-        foreach ($GLOBALS["argv"] as $index => $value) {
+        foreach ($GLOBALS["argv"] as $index => $name) {
             if ($index == 0) {
-                console("> Magitued has arranged " . $value)->paint("LIGHTGREEN");
-                return;
+                console("> Magitued has arranged " . $name)->paint("LIGHTGREEN");
+                continue;
             }
-            if (isset(self::$BidsArray[$value])) {
-                self::$BidsArray[$value]->__invoke();
+            if (isset(self::$BidsArray[$name])) {
+                self::$BidsArray[$name]->__invoke();
             }   
         }
     }
