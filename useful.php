@@ -125,6 +125,7 @@ class useful
     private static $included = false;
     private static $geo;
     public static $proceedRail;
+    public static $TorFree = false;
     public static $settings = [
         "notice" => on,
     ];

@@ -1,5 +1,11 @@
 <?php namespace Magitued\bot\foreground;
 
+// Setup Settings
+\useful::setUp([
+    "notice" => off,
+]);
+
+// Commands Handlers
 cluster::AddHandler([
     "command" => "/hahui",
     "message" => "Good day, Sir!",
@@ -12,6 +18,18 @@ cluster::AddHandler([
 cluster::AddHandler([
     "command" => "jopa",
     "message" => "Anal, then.",
+]);
+
+cluster::AddHandler([
+    "command" => "/stop",
+    "message" => "Bot has been stopped",
+    "eval" => function (&$thisArray, &$UserDataArray, &$MadelineProto) {
+        print_r($UserDataArray);
+        print_r(yield $MadelineProto->getFullInfo($UserDataArray["message"]["from_id"])->user->username);
+    },
+    " " => [
+        +79610870907,
+    ],
 ]);
 
 ?> 

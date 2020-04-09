@@ -11,6 +11,9 @@ class cluster
     }
     static public function AddHandler(array $HandlerArray) : void
     {
+        if (isset($HandlerArray["able"])) {
+            $HandlerArray["able"] = false;
+        }
         self::$HandlersArray[$HandlerArray["command"]] = &$HandlerArray;
     }
 }

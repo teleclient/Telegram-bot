@@ -4,15 +4,14 @@ class EventHandler extends \danog\MadelineProto\EventHandler
 {
     private $awaitings;
     private $info;
+    private $HandlersArray;
     public function __construct($MadelineProto)
     {
         parent::__construct($MadelineProto);
-        useful::setUp([
-            "notice" => off,
-        ]);
         $db = new \Magitued\abilities\DataBase(Magitued_BOT_DIR . "/database.json");
         $stringer = new \Magitued\abilities\stringer(Magitued_BOT_DIR . "/strings");
         $this->awaitings = new \Magitued\abilities\awaitings($db);
+        $this->HandlersArray = \Magitued\bot\foreground\cluster::$HandlersArray;
         $this->info = $stringer->cat("bot");
     }
     public function onUpdateBotCallbackQuery($update)
@@ -77,66 +76,18 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         global $time;
         $time = microtime(true);
         
-        /*
-        $awaitings["user"] = yield $this->awaitings->pullWith("user", [
-            "peer" => &$update['message']['from_id'],
-            "message" => &$update['message']['message'],
-        ]);
-        
-
-        $handleMessage = function ($message = false, $closure = null, array $users = []) use (&$awaitings) {
-            if (
-                ($message && $message != $awaitings['user']['givenData']['message'])
-                || (!empty($users) && !in_array($awaitings['user']['givenData']['peer'], $users))
-                ) return;
-
-            global $time;
-
-            $options = [ // Default options
-                "peer" => &$awaitings['user']['givenData']['peer'],
-                "message" => "Default message",
-                'parse_mode' => 'HTML',
-            ];
-            unset($options['_']);
-
-            if (gettype($closure) == "object") 
-                $options = yield array_merge($options, yield $closure->__invoke());
-            elseif (gettype($closure) == "array")
-                $options = yield array_merge($options, $closure);
-            else {
-                $options['message'] .= ' in '.(microtime(true) - $time).' seconds';
-            }
-
-
-            yield $this->message($options);
-            if (isset($options['die'])) die;
-            else throw new Exception("OK");
-        };
-
-        if ($awaitings['user']['isNew'] && false) {
-            $Chat = yield $this->get_info($update);
-            $user = $update['message']['from_id'];
-            if (!isset($Chat['User']['first_name']) && empty($Chat['User']['first_name'])) $Chat['User']['first_name'] = null;
-            if (!isset($Chat['User']['last_name']) && empty($Chat['User']['last_name'])) $Chat['User']['last_name'] = null;
-            yield $this->db->query("INSERT INTO users (user, first_name, last_name) VALUES ('$user', '{$Chat['User']['first_name']}', '{$Chat['User']['last_name']}')");
-        }
-
-        */
-        
         yield $this->commands(function () use (&$handleMessage, &$update) {
             global $time;
-            $HandlersArray = &\Magitued\bot\foreground\cluster::$HandlersArray;
             $message = $update["message"]["message"];
-            if (isset($HandlersArray[$message])) {
-                $HandlerArray = $HandlersArray[$message];
+            if (isset($this->HandlersArray[$message])) {
+                $HandlerArray = $this->HandlersArray[$message];
                 isset($HandlerArray["eval"]) ? true : $HandlerArray["eval"] = function () { };
-                yield $HandlerArray["eval"]($HandlerArray);
+                yield $HandlerArray["eval"]($HandlerArray, $update, $this);
                 yield $this->message([
                     "peer" => $update['message']['from_id'],
                     "message" => $HandlerArray["message"] . ' in ' . (microtime(true) - $time).' seconds',
                     'parse_mode' => 'HTML',
                 ]);
-                //yield $handleMessage($message);
             }
         });
 
@@ -181,28 +132,6 @@ class Matter extends EventHandler
             if ($action['_']) return $action['return'];
         }
     }
-    public function updateInfo()
-    {
-        // Updating general information
-        $result = $this->db->query("SELECT name, content FROM info");
-        while (yield $row = $result->fetch_assoc()) {
-            yield $this->info[$row['name']] = $row['content'];
-        }
-
-        // Updating game options
-        $obtain = yield $this->obtain();
-        yield $message = "<b>{$obtain['header']},</b><br>{$obtain['text']}";
-        $options = [
-            'message' => $message,
-            'media' => [
-                '_' => 'inputMediaUploadedPhoto',
-                'file' => $obtain['picture'],
-            ],
-            'reply_markup' => $obtain['markups'],
-            'parse_mode' => 'HTML',
-        ];
-        $this->game['options'] = $options;
-    }
     public function message(array $options)
     {
         if (!isset($options['method'])) $options['method'] = null;
@@ -226,40 +155,6 @@ class Matter extends EventHandler
         } catch (\danog\MadelineProto\RPCErrorException $e) {
             yield $this->messages->sendMessage(['peer' => 565324826, 'message' => $e]);
         }
-    }
-    public function obtain()
-    {
-        yield $result = $this->db->query("SELECT * FROM questions WHERE id = '3'");
-        yield $row = $result->fetch_assoc();
-
-        $header = $row['qtitle'];
-        $text = $row['qtext'];
-        $picture = empty($row['picture']) ? null:$row['picture'];
-        yield $answers = json_decode($row['answers']);
-
-        if ($row['answers'] != "[]") {
-            $i = 1;
-            foreach ($answers as $key => $value) {
-                $buttons[] = [
-                    '_' => 'keyboardButtonCallback',
-                    'text' => "{$value->title}",
-                    'data' => "{$value->correct}",
-                ];
-                if ($i == count($answers) || ($i > 0 && ($i % 2 == 0))) {
-                    $rows[] = ['_' => 'keyboardButtonRow', 'buttons' => $buttons];
-                    unset($buttons);
-                }
-                $i++;
-            }
-            $markups = ['_' => 'replyInlineMarkup', 'rows' => $rows];
-        }
-
-        return [
-            "header" => $header,
-            "text" => $text,
-            "picture" => $picture,
-            "markups" => isset($markups) ? $markups:null,
-        ];
     }
 }
 
