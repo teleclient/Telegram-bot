@@ -14,51 +14,6 @@ class EventHandler extends \danog\MadelineProto\EventHandler
         $this->HandlersArray = \Magitued\bot\foreground\cluster::$HandlersArray;
         $this->info = $stringer->cat("bot");
     }
-    public function onUpdateBotCallbackQuery($update)
-    {
-        yield $this->messages->setTyping(['peer' => $update, 'action' => ['_' => 'sendMessageTypingAction']]);
-
-        $markups = ['_' => 'replyInlineMarkup', 'rows' => [
-            ['_' => 'keyboardButtonRow', 'buttons' => [
-                [
-                    '_' => 'keyboardButtonCallback',
-                    'text' => $this->info['button_again'],
-                    'data' => "again",
-                ]
-            ]]
-        ]];
-        $options = [
-            'peer' => $update,
-            'id' => $update['msg_id'],
-            'message' => $update['data'],
-            'reply_markup' => $markups,
-            'parse_mode' => 'HTML',
-        ];
-        
-
-        if ($update['data'] == "true") {
-            $options['message'] = $this->info['info_correct'];
-            $options['reply_markup'] = null;
-        } elseif ($update['data'] == "again") {
-            try {
-                $obtain = yield $this->obtain();
-            } catch (\Throwable $e) {
-                print $e->getMessage();
-            }
-            $message = "<b>{$obtain['header']},</b><br>{$obtain['text']}";
-            $options['message'] = $message;
-            $options['reply_markup'] = $obtain['markups'];
-        } elseif ($update['data'] == "false") {
-            $options['message'] = $this->info['info_inCorrect'];
-        }
-
-        try {
-            yield $this->messages->editMessage($options);
-        } catch (\Throwable $e) {
-            print $e->getMessage();
-        }
-        yield $this->messages->setBotCallbackAnswer(['query_id' => $update["query_id"], 'cache_time' => 0]);
-    }
     public function commands(object $closure)
     {
         try {

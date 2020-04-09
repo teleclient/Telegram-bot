@@ -23,18 +23,4 @@ tyre::begin(function () {
     console("> Magitued Project thanks you for using our Open Source application. Please, enjoy it!")->paint("LIGHTGREEN");
 });
 
-$asd = 123;
-
-class asd {
-    static public $var;
-    static public function do()
-    {
-        self::$var = $asd;
-        self::$var = 6;
-        return [$asd, self::$var];
-    }
-}
-
-print_r(asd::do());
-
 ?>

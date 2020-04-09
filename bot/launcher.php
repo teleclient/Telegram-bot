@@ -18,6 +18,8 @@ include 'EventHandler.php';
 $settings = file_get_contents(Magitued_BOT_DIR . "/settings.json");
 $settings = json_decode($settings, true);
 
+define('MADELINE_BRANCH','dev');
+
 #include 'login_helper.php';
 $MadelineProto = new \danog\MadelineProto\API('sessions/bot.session', $settings);
 $MadelineProto->async(true);
