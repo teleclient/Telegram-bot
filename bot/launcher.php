@@ -20,7 +20,7 @@ $settings = json_decode($settings, true);
 
 define('MADELINE_BRANCH','dev');
 
-#include 'login_helper.php';
+#include 'login_helper.php'; 
 $MadelineProto = new \danog\MadelineProto\API('sessions/bot.session', $settings);
 $MadelineProto->async(true);
 $MadelineProto->resetUpdateState();
