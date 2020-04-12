@@ -1,7 +1,6 @@
 <?php
 
-print_r(isset([
-   "shit" => "fuck", 
-]["shit"]));
+$time = microtime(true);
+print microtime(true) - $time;
 
 ?>

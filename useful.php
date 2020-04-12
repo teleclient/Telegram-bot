@@ -247,7 +247,7 @@ class tyre {
             }
             if (isset(self::$BidsArray[$name])) {
                 self::$BidsArray[$name]->__invoke();
-            }   
+            }
         }
     }
 }
