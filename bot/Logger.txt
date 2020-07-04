@@ -1,0 +1,6 @@
+mysqli::__construct(): (HY000/1045): Access denied for user 'R6Io5t1GiZ'@'93.81.216.126' (using password: YES)
+mysqli::__construct(): (HY000/1045): Access denied for user 'R6Io5t1GiZ'@'93.81.216.126' (using password: YES)
+DataBase settings were successfully recieved
+mysqli::__construct(): (HY000/1045): Access denied for user 'R6Io5t1GiZ'@'93.81.216.126' (using password: YES)
+DataBase settings were successfully recieved
+mysqli::__construct(): (HY000/1045): Access denied for user 'R6Io5t1GiZ'@'93.81.216.126' (using password: YES)

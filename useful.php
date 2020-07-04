@@ -10,6 +10,17 @@ define("on", true);
 
 shell_exec("alias Magitued='php magitued.php'");
 
+function Logger(string $file_name = "Logger.txt") {
+    $file_handler = fopen($file_name, "a");
+    while (true) {
+        $yield = yield;
+        fwrite($file_handler, $yield . "\n");
+        // console("My message is " . $yield)->paint("BLACK", "LIGHTGRAY");
+        // usleep(1000000);
+    }
+    fclose($file_handler);
+}
+
 /**
      * Pretty colourful version of print, prints text into console
      * 
@@ -70,6 +81,8 @@ class log
     {
         $this->string = &$text;
         $this->paint();
+        $this->logger = Logger();
+        $this->logger->send($text);
     }
 
     public function formatColours(array $args)
@@ -111,11 +124,10 @@ class log
         if ($text) print(PHP_EOL.$text.PHP_EOL); else print(PHP_EOL.$this->print.PHP_EOL);
     }
 }
-/**
- * This function resembles JavaScript function 'console'
- */
+
 function console(string $text) : object
 {
+    // $Logger->send($text);
     return new log($text);
 }
 
@@ -133,8 +145,8 @@ class useful
     public function __construct()
     {
         self::$included = true;
-        #console("Hello, I'm constructed and ready to help you because I'm the most useful class ever!")
-        #->paint("BLACK", "LIGHTGRAY");
+        console("Hello, I'm constructed and ready to help you because I'm the most useful class ever!")
+        ->paint("BLACK", "LIGHTGRAY");
     }
     
     public static function date_to_words(string $date, $lang = null, $letters = null) {
@@ -199,13 +211,13 @@ class useful
             // ifs 
             //if (self::$geo) {
                 //if ($file_size > 0) self::$proceedRail = "Blocked";
-                if ($file_size > 1200) self::$proceedRail = "Connected";
+                // if ($file_size > 1200) self::$proceedRail = "Connected";
             //}
-            if ($file_size > 1400) self::$proceedRail = 2;
-            if ($file_size > 5000) self::$proceedRail = 3;
-            if ($file_size > 20000) self::$proceedRail = 4;
-            if ($step !== true) console($step)->log();
-            if ($file_size > 20000) self::$proceedRail = 0;
+            // if ($file_size > 1400) self::$proceedRail = 2;
+            // if ($file_size > 5000) self::$proceedRail = 3;
+            // if ($file_size > 20000) self::$proceedRail = 4;
+            // if ($step !== true) console($step)->log();
+            // if ($file_size > 20000) self::$proceedRail = 0;
         }
     }
 }

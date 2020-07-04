@@ -2,7 +2,7 @@
 
 // Setup Settings
 \useful::setUp([
-    "notice" => off,
+    "notice" => on,
 ]);
 
 // Commands Handlers
