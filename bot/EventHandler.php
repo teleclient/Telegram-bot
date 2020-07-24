@@ -113,6 +113,18 @@ class Matter extends EventHandler
     }
 }
 
+class Test extends \danog\MadelineProto\EventHandler {
+    public function __construct(&$MadelineProto) {
+        parent::__construct($MadelineProto);
+    }
+    public function onUpdateNewMessage($update) : void
+    {
+        if (isset($update['message']['out']) && $update['message']['out']) {
+            return;
+        }
+    }
+}
+
 
 
 ?>
